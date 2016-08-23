@@ -28,7 +28,7 @@ or
 
 set two points as pressed and set one as node, then press space.
 
-###Using terrain your game
+##Using terrain in your game
 When terrain is ready go File -> Export
 
 Curves segments will be saved to txt file.
@@ -40,3 +40,6 @@ Curves segments will be saved to txt file.
 >x3 y3 x4 y 4   //third
 
 Now you must load segments from file. If you need help go examples\example_loading.cpp
+
+##Download
+v1.0 http://goo.gl/nx9Nog

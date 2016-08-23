@@ -1,7 +1,7 @@
 /*
     FileDialog window feature for SFGUI
     https://github.com/Potat0x/SFGUI-FileDialog
-    http://potat0x.cba.pl/
+    http://potat0x.cba.pl
 */
 
 #ifndef file_dialog
