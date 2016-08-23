@@ -1,0 +1,23 @@
+Control
+Mouse Middle - 	set point as node
+Mouse Left- 	set point as selected
+Mouse Right - 	set point as pressed
+Keyboard N -	add point
+Keyboard Y -	add curve
+
+Select/press multiple points
+hold left ctrl and click Mouse Left/Right
+or
+hold left shift and drag pressed Mouse Left/Right
+press F1 to set all point as pressed
+press F2 to set all point as selected
+
+Creating a curve
+press two points and set one point as node, then press Space
+
+Moving points
+select points, hold Left Ctrl and drag with Mouse Left
+
+Deleting points
+press points and press Delete or X
+
