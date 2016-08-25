@@ -22,6 +22,7 @@ void Gui::create_new_file_after_dialog()
 
 Gui::Gui(sf::RenderWindow & sfml_window)
 {
+    //desktop.GetEngine().LoadThemeFromFile("theme.css");
     filedialog.setRenderWindow(sfml_window);
     last_nonzero_step = 0.5f;
     //

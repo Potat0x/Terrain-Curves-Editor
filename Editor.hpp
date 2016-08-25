@@ -98,7 +98,7 @@ private:
     void check_connection(const Point * test);
     void draw_pixel(sf::Vector2f pos, sf::Color color, float a);
     void draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vector2f& p3);
-    void draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2);
+    void draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Color & color);
 };
 
 #endif // editor_hpp

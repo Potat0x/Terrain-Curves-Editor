@@ -19,6 +19,8 @@ public:
     enum Item
     {
         CURVE,
+        LINK,
+        PIX,
         POINT,
         POINT_PRESSED,
         POINT_SELECTED,

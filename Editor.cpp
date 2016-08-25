@@ -40,7 +40,7 @@ Editor & Editor::get_Editor()
     return Editor;
 }
 
-void Editor::draw_pixel(sf::Vector2f pos, sf::Color color = Colors::get().getColor(Colors::CURVE), float a = 1)
+void Editor::draw_pixel(sf::Vector2f pos, sf::Color color = Colors::get().getColor(Colors::PIX), float a = 1)
 {
     sf::RectangleShape shape(sf::Vector2f(a, a));
     shape.setPosition(pos.x, pos.y);
@@ -384,7 +384,7 @@ bool Editor::move_curve()
     return false;
 }
 
-void Editor::draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2)
+void Editor::draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Color & color)
 {
     a = abs(p1.x-p2.x);
     b = abs(p1.y-p2.y);
@@ -398,6 +398,7 @@ void Editor::draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2)
     line.setPosition((p1.x+p2.x)/2.0f, (p1.y+p2.y)/2.0f);
     line.setRotation(drl_angle* 180.0f / 3.1415926f);
     //line.setFillColor(rand_color());
+    line.setFillColor(color);
     App::getApp().get_sfml_window().draw(line);
 }
 
@@ -408,8 +409,8 @@ void Editor::draw_connections()
     {
         for(unsigned int c = 0; c < points.at(i)->connected.size(); c++)
         {
-            draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr1->getPosition());
-            draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr2->getPosition());
+            draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr1->getPosition(), Colors::get().getColor(Colors::LINK));
+            draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr2->getPosition(), Colors::get().getColor(Colors::LINK));
             /*float dist = 0;   //link length
             dist += abs(sqrt( pow(points.at(i)->getPosition().x-points.at(i)->connected.at(c).node_ptr1->getPosition().x, 2)  +  pow(points.at(i)->getPosition().y-points.at(i)->connected.at(c).node_ptr1->getPosition().y, 2) ));
             dist += abs(sqrt( pow(points.at(i)->getPosition().x-points.at(i)->connected.at(c).node_ptr2->getPosition().x, 2)  +  pow(points.at(i)->getPosition().y-points.at(i)->connected.at(c).node_ptr2->getPosition().y, 2) ));
@@ -438,7 +439,7 @@ void Editor::draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vect
         {
            if(draw_lines)
            {
-               draw_line(last, sf::Vector2f(x, y));
+               draw_line(last, sf::Vector2f(x, y), Colors::get().getColor(Colors::CURVE));
            }
            segments++;
                 /*
