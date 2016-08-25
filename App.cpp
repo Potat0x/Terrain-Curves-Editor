@@ -51,6 +51,42 @@ void App::run()
                 zoom_view(event.mouseWheel.delta);
             else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return)
                 gui->filedialog.enterKeyPressed();
+            else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
+            {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    gui->save_file();
+                }
+            }
+            else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::N)
+            {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    gui->show_new_file_window(true);
+                }
+            }
+            else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::O)
+            {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    gui->open_file();
+                }
+            }
+            else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::E)
+            {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    gui->export_to_file();
+                }
+            }
+            else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::G)
+            {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    gui->switch_grid_usage();
+                }
+            }
+
             else if (event.type == sf::Event::Resized)
             {
                 sf::Vector2f vc = view.getCenter();

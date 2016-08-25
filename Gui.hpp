@@ -96,13 +96,10 @@ class Gui
     Box::Ptr new_file_box_lines[4];
     Button::Ptr nf_apply, nf_close, nf_browse;
     Separator::Ptr nf_sep;
-    void show_new_file_window(bool s);
+
     void create_new_file_apply();
     void create_new_file();
-    void open_file();
-    void save_file();
     void save_file_as();
-    void export_to_file();
     void save_and_exit_app();
 
 public:
@@ -117,6 +114,12 @@ public:
     void show_unsaved_ch_window(const string & filename);
     void show_info(const string & title, const string & message);
     void create_new_file_after_dialog();
+
+    void switch_grid_usage();
+    void save_file();
+    void show_new_file_window(bool s);
+    void open_file();
+    void export_to_file();
 };
 
 #endif // gui_hpp

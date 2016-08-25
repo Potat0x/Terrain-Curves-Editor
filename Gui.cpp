@@ -475,6 +475,14 @@ void Gui::load_b_view()
     grid_value.get()->SetText("grid_value");
 }
 
+void Gui::switch_grid_usage()
+{
+    load_tmp_settings();
+    use_grid.get()->SetActive(!use_grid.get()->IsActive());
+    Editor::get_Editor().draw_gr = use_grid.get()->IsActive();
+    update_settings();
+}
+
 void Gui::update_view()
 {
     if(link.get()->IsActive())
@@ -577,6 +585,7 @@ void Gui::create_new_file_apply()
         cout<<"create file ok"<<fn<<endl;
         show_new_file_window(false);
         Editor::get_Editor().current_filename = fn;
+        Editor::get_Editor().update_title();
     }
     else show_info("Error", fn+"\nCreate file error.");
 }
