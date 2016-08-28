@@ -86,6 +86,14 @@ void App::run()
                     gui->switch_grid_usage();
                 }
             }
+            else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Z)
+            {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    cout<<"ctrlz"<<endl;
+                    Editor::get_Editor().undo();
+                }
+            }
 
             else if (event.type == sf::Event::Resized)
             {
@@ -116,7 +124,7 @@ void App::run()
     }
 }
 
-void App::close(bool confirmed)
+void App::close(bool confirmed)//confirmed = false
 {
     if(confirmed)
     window.close();

@@ -2,7 +2,9 @@
 
 Colors::Colors()
 {
-    color = new sf::Color[COLORS_COUNT];
+    unique_ptr<sf::Color[]> tmp (new sf::Color[COLORS_COUNT]);
+    color = move(tmp);
+    //color = unique_ptr<sf::Color[]>(new sf::Color[COLORS_COUNT]);
 
     /*color[CURVE] = sf::Color(5, 155, 190);
     color[LINK] = sf::Color(40, 159, 88, 100);
@@ -36,5 +38,5 @@ sf::Color Colors::getColor(Item item)
 
 Colors::~Colors()
 {
-    delete [] color;
+    //delete [] color;
 }

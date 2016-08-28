@@ -6,8 +6,7 @@
 
 #ifndef file_dialog
 #define file_dialog
-
-#include <SFGUI/SFGUI.hpp>
+#include <SFGUI/Widgets.hpp>
 #include <sys/stat.h>
 #include <dirent.h>
 
@@ -36,6 +35,7 @@ public:
         Data(string dir, string fn, string fp): directory(dir), file_name(fn), file_path(fp)  {}
     };
     Data data;
+
     FileDialog();
     void setDesktop(Desktop & desktop);//pass desktop to filedialog. Required before using dialog
     void setRenderWindow(sf::RenderWindow & win);//if you use it FileDialog will be centered in RenderWindow

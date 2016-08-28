@@ -3,12 +3,15 @@
 
 #include <SFML/Graphics.hpp>
 #include <cmath>
-#include "Link.hpp"
 #include "functs.hpp"
 #include "Gui.hpp"
+#include "Point.hpp"
+#include <utility>
+#include <memory>
 
 using namespace std;
 class Gui;
+class Link;
 
 class Editor
 {
@@ -37,7 +40,12 @@ private:
     bool draw_pts;
     bool draw_cur;
 
-    vector<Point*>points;
+    //vector<Point*>points;
+    vector<shared_ptr<Point>>points;
+
+    //vector<vector<pair<Point*, vector<Link>>>>history;//undo-redo
+    vector<vector<pair<shared_ptr<Point>, vector<Link>>>>history;//undo-redo
+
     sf::RectangleShape area_shapes[4];
     sf::RectangleShape area_lines[4];
     int area_type;//select = 1, press = 2
@@ -63,6 +71,9 @@ private:
     bool unsaved;
 
 public:
+    void create_snapshot();
+    void undo();
+
     static Editor & get_Editor();
     void draw();
     void update();
@@ -92,10 +103,10 @@ public:
 
 private:
     void update_title();
-    Point * get_point_by_id(unsigned int id);
+    shared_ptr<Point> get_point_by_id(unsigned int id);
     void create_idents();
-    void delete_point(Point * ptr);
-    void check_connection(const Point * test);
+    void delete_point(const shared_ptr<Point> & ptr);
+    void check_connection(const shared_ptr<Point> & test);
     void draw_pixel(sf::Vector2f pos, sf::Color color, float a);
     void draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vector2f& p3);
     void draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Color & color);

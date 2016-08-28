@@ -1,10 +1,11 @@
 #ifndef colors_hpp
 #define color_hpp
 #include <SFML/Graphics.hpp>
-
+#include <memory>
+using namespace std;
 class Colors
 {
-    sf::Color * color;//array
+    unique_ptr<sf::Color[]>color;//array
     Colors();
     Colors(const Colors & c){}
     ~Colors();

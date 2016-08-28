@@ -11,15 +11,15 @@
 using namespace std;
 
 class Link;
-class Point
+class Point : public std::enable_shared_from_this<Point>
 {
 
 public:
 static bool after_group;
-    static vector<Point*>pressed_ptrs;
-    static vector<Point*>selected_ptrs;
+    static vector<shared_ptr<Point>>pressed_ptrs;
+    static vector<shared_ptr<Point>>selected_ptrs;
 
-    static Point*node_ptr;
+    static shared_ptr<Point>node_ptr;
     unsigned int ident;
 
     vector<Link>connected;
@@ -41,8 +41,8 @@ private:
     bool ppm_released;
     bool ppm_pressed;
 
-    sf::RectangleShape shape;
     sf::Vector2f diff;
+    sf::RectangleShape shape;
 
 public:
     void draw(sf::RenderWindow * win);
@@ -51,16 +51,16 @@ public:
     bool mouse_contain();
     sf::Vector2f getPosition();
     void set_on_grid_position();
-    void connect_this(Point * ptr1, Point * ptr2);
+    void connect_this(const shared_ptr<Point>& ptr1, const shared_ptr<Point>& ptr2);
     void setPressed(bool p);
     void setSelected(bool s);
 
-    static void connect();
+    static bool connect();
     static void move_group();
     static void calculate_diff();
     static bool check_connection();
-    static void erase_pressed(Point * ptr);
-    static void erase_selected(Point * ptr);
+    static void erase_pressed(const shared_ptr<Point>& ptr);
+    static void erase_selected(const shared_ptr<Point>& ptr);
 };
 
 #endif // point_hpp

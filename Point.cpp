@@ -1,9 +1,9 @@
 #include "Point.hpp"
 
-vector <Point*>Point::pressed_ptrs;
-vector <Point*>Point::selected_ptrs;
+vector <shared_ptr<Point>>Point::pressed_ptrs;
+vector <shared_ptr<Point>>Point::selected_ptrs;
 
-Point*Point::node_ptr;
+shared_ptr<Point>Point::node_ptr;
 sf::Vector2i Point::grid;
 
 bool Point::after_group;
@@ -82,7 +82,7 @@ bool Point::select_press(bool can_press)
         {
                 if(press && can_press)
                 {
-                    if( (pressed_ptrs.size() == 1 && pressed_ptrs.at(0) == this) || pressed_ptrs.size() == 0 || (pressed_ptrs.size() > 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)))/////!!!!!   !sf::K
+                    if( (pressed_ptrs.size() == 1 && pressed_ptrs.at(0).get() == this) || pressed_ptrs.size() == 0 || (pressed_ptrs.size() > 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)))
                     {
                         lpm_pressed = true;
                         setPressed(true);
@@ -136,13 +136,13 @@ bool Point::select_press(bool can_press)
                 {
                     is_node = true;
                     shape.setFillColor(Colors::get().getColor(Colors::NODE));
-                    if(node_ptr != nullptr && node_ptr != this)
+                    if(node_ptr.get() != nullptr && node_ptr.get() != this)
                     {
                         node_ptr->shape.setFillColor(Colors::get().getColor(Colors::POINT));
                         node_ptr->is_node = false;
 
                     }
-                    node_ptr = this;
+                    node_ptr = shared_from_this();
                 }
             }
             mpm_released = false;
@@ -214,25 +214,26 @@ bool Point::check_connection()
     return false;
 }
 
-void Point::connect_this(Point * ptr1, Point * ptr2)
+void Point::connect_this(const shared_ptr<Point>& ptr1, const shared_ptr<Point>& ptr2)
 {
     this->connected.push_back(Link(ptr1, ptr2));
 }
 
-void Point::connect()
+bool Point::connect()
 {
     if(node_ptr != nullptr && selected_ptrs.size() == 2)
     {
         if(check_connection() == false)
         {
-            node_ptr->connected.push_back(Link(selected_ptrs.at(0), selected_ptrs.at(1)));
             Editor::get_Editor().unsaved_change();
-            //cout<<"connect"<<endl;
-        }   //else  cout<<"CONNECTION ALREADY EXIST"<<endl;
+            node_ptr->connected.push_back(Link(selected_ptrs.at(0), selected_ptrs.at(1)));
+            return true;
+        }
     }
+    return false;
 }
 
-void Point::erase_pressed(Point * ptr)
+void Point::erase_pressed(const shared_ptr<Point>& ptr)
 {
     for(unsigned int i = 0; i < pressed_ptrs.size(); i++)
     {
@@ -244,7 +245,7 @@ void Point::erase_pressed(Point * ptr)
     }
 }
 
-void Point::erase_selected(Point * ptr)
+void Point::erase_selected(const shared_ptr<Point>& ptr)
 {
     for(unsigned int i = 0; i < selected_ptrs.size(); i++)
     {
@@ -262,7 +263,7 @@ void Point::setPressed(bool p)
     {
         if(pressed == false)
         {
-            pressed_ptrs.push_back(this);
+            pressed_ptrs.push_back(shared_from_this());
             //pressed_count++;
         }
 
@@ -273,7 +274,7 @@ void Point::setPressed(bool p)
     {
         if(pressed == true)
         {
-            erase_pressed(this);
+            erase_pressed(shared_from_this());
             //pressed_count--;
         }
 
@@ -291,7 +292,7 @@ void Point::setSelected(bool s)
     {
         if(selected == false)
         {
-            selected_ptrs.push_back(this);
+            selected_ptrs.push_back(shared_from_this());
         }
         selected = true;
         shape.setFillColor(Colors::get().getColor(Colors::POINT_SELECTED));
@@ -300,7 +301,7 @@ void Point::setSelected(bool s)
     {
         if(selected == true)
         {
-            erase_selected(this);
+            erase_selected(shared_from_this());
         }
 
         selected = false;
@@ -308,7 +309,6 @@ void Point::setSelected(bool s)
         if(pressed)
         shape.setFillColor(Colors::get().getColor(Colors::POINT_PRESSED));
     }
-    //cout<<"selected = "<<selected_ptrs.size()<<endl;
 }
 
 sf::Vector2f Point::getPosition()
@@ -343,13 +343,18 @@ void Point::move()
     if(pressed)
     {
         //if(pressed_ptrs.size() == 1)
+
+        Editor::get_Editor().unsaved_change();
         {
             if(use_grid == true)
             set_on_grid_position();
             else
-            shape.setPosition(Inputs::getInputs().mousePos());
+            {
+                shape.setPosition(Inputs::getInputs().mousePos());
+            }
+
         }
-        Editor::get_Editor().unsaved_change();
+
     }
 }
 
@@ -370,9 +375,9 @@ void Point::calculate_diff()
 void Point::move_group()
 {
     sf::Vector2f mouse_pos = Inputs::getInputs().mousePos();
+    Editor::get_Editor().unsaved_change();
     for(unsigned int i = 0; i < pressed_ptrs.size(); i++)
     {
         pressed_ptrs.at(i)->shape.setPosition(sf::Vector2f(mouse_pos.x-pressed_ptrs.at(i)->diff.x, mouse_pos.y-pressed_ptrs.at(i)->diff.y));
     }
-    Editor::get_Editor().unsaved_change();
 }

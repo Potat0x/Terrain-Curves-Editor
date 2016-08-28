@@ -50,8 +50,8 @@ void FileDialog::update()
         }
 
         //cout<<"Pack start"<<endl;
-        sf::Clock clock;
-        clock.restart();
+        //sf::Clock clock;
+        //clock.restart();
         for(unsigned int i = 0; i < items.size(); i++)
         {
             if(items[i]->to_delete == false)
@@ -129,8 +129,8 @@ FileDialog::FileDialog()
     sfml_window = nullptr;
     desktop_ = nullptr;
     ExplorerItem::loadImages();
-    sf::Clock clock;
-    clock.restart();
+    //sf::Clock clock;
+    //clock.restart();
 
     //sf::Vector2f window_size(320, 700);
     dialog_window = Window::Create();
@@ -280,8 +280,11 @@ void FileDialog::action(Action action_type)
     dialog_window->SetState(Widget::State::NORMAL);
     listFiles(path);
     dialog_window->Show(true);
-    if(sfml_window != nullptr)
-    dialog_window->SetPosition(sf::Vector2f(sfml_window->getSize().x/2 - dialog_window->GetAllocation().width/2, sfml_window->getSize().y/2 - dialog_window->GetAllocation().height/2));
+    if(sfml_window != nullptr){}
+    //sf::RenderWindow()
+    //www.create(sf::VideoMode(8, 8), "");
+//    sfml_window->getSize();
+    //dialog_window->SetPosition(sf::Vector2f(sfml_window->getSize().x/2 - dialog_window->GetAllocation().width/2, sfml_window->getSize().y/2 - dialog_window->GetAllocation().height/2));
     desktop_->BringToFront(dialog_window);
 
     if(action_type == SELECT_FILE)
