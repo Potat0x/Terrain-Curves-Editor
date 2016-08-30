@@ -16,10 +16,19 @@ class Link;
 class Editor
 {
     friend class Gui;
-    public:
+public:
     shared_ptr<Gui>gui;
-private:
+    static Editor & get_Editor();
+    void draw();
+    void update();
+    void undo();
+    void redo();
+    void unsaved_change();
+    bool check_if_unsaved_changes();
+    string get_current_filename();
+    void create_snapshot();
 
+private:
     enum GuiOperations
     {
         NONE,
@@ -40,11 +49,10 @@ private:
     bool draw_pts;
     bool draw_cur;
 
-    //vector<Point*>points;
     vector<shared_ptr<Point>>points;
-
-    //vector<vector<pair<Point*, vector<Link>>>>history;//undo-redo
-    vector<vector<pair<shared_ptr<Point>, vector<Link>>>>history;//undo-redo
+    vector<vector<tuple<shared_ptr<Point>, vector<Link>, sf::Vector2f>>>history;//undo-redo
+    int history_iter;
+    void clear_changes_history();
 
     sf::RectangleShape area_shapes[4];
     sf::RectangleShape area_lines[4];
@@ -58,6 +66,7 @@ private:
     bool key_addnew_released_curve;
     bool selectall_released, pressall_released;
     bool drawarea_released;
+    bool points_dragged;
     void area_contain();
     sf::RectangleShape grid_line;
     sf::Vector2i get_grid_bounds();
@@ -66,42 +75,38 @@ private:
     sf::RectangleShape line;
 
     Editor();
-    Editor(const Editor &){}
+    Editor(const Editor &) {}
     string current_filename;
     bool unsaved;
 
-public:
-    void create_snapshot();
-    void undo();
 
-    static Editor & get_Editor();
-    void draw();
-    void update();
-    void unsaved_change();
-    bool check_if_unsaved_changes();
-    void file_dialog_event();
-    void zoom_view(float delta);
-    string get_current_filename();
+    void add_point_on_cursor();
+    void add_curve_on_cursor();
+
+    void delete_points();
+    void delete_all();
 
     void select_all();
     void press_all();
-    bool move_curve();
+    void move_curve();
+    void select_point();
+
     void draw_curve();
     void draw_points();
+    void draw_grid();
+    void draw_area();
+    void area();
     void draw_connections();
-    void delete_points();
-    void select_point();
-    void delete_all();
+
+
+    void ft();
+    void apply_it(const auto & h_item);
+
+    void file_dialog_event();
+    void load_from_file(string filename);
     bool save_to_file();
     void save_segments_to_file(string filename);
-    void load_from_file(string filename);
-    void add_point_on_cursor();
-    void add_curve_on_cursor();
-    void draw_grid();
-    void area();
-    void draw_area();
 
-private:
     void update_title();
     shared_ptr<Point> get_point_by_id(unsigned int id);
     void create_idents();

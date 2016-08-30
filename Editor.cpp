@@ -29,7 +29,9 @@ Editor::Editor()
     }
     bg_pressed = false;
     unsaved = false;
+    points_dragged = false;
     area_type = 0;
+    history_iter = 0;
     draw_step = 0.04f;
     file_pr = "42657a6965724375727665456469746f722046696c65";//hex "EditorCurveApp File"
 }
@@ -121,7 +123,7 @@ void Editor::area()
         drawarea_start.x = 0;
         drawarea_start.y = 0;
         for(int i = 0; i < 4; i++)
-        area_shapes[i].setPosition(drawarea_start);
+            area_shapes[i].setPosition(drawarea_start);
     }
 
     float t = 1;
@@ -137,14 +139,14 @@ void Editor::area()
     for(int i = 0; i < 4; i++)
     {
         if(area_type == 1)
-        area_lines[i].setFillColor(Colors::get().getColor(Colors::AREA_SELECTED));
+            area_lines[i].setFillColor(Colors::get().getColor(Colors::AREA_SELECTED));
         else if(area_type == 2)
-        area_lines[i].setFillColor(Colors::get().getColor(Colors::AREA_PRESSED));
+            area_lines[i].setFillColor(Colors::get().getColor(Colors::AREA_PRESSED));
     }
 
     if(!drawarea_released && sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && (Inputs::getInputs().get(sf::Mouse::Right) || Inputs::getInputs().get(sf::Mouse::Left)))
-    if(area_shapes[0].getPosition().x != 0 && area_shapes[0].getPosition().y != 0)
-    area_contain();
+        if(area_shapes[0].getPosition().x != 0 && area_shapes[0].getPosition().y != 0)
+            area_contain();
 }
 
 void Editor::area_contain()
@@ -159,9 +161,9 @@ void Editor::area_contain()
         for(unsigned int i = 0; i < points.size(); i++)
         {
             if(points.at(i)->selected)
-            points.at(i)->setSelected(false);
+                points.at(i)->setSelected(false);
             else if(points.at(i)->pressed)
-            points.at(i)->setPressed(false);
+                points.at(i)->setPressed(false);
         }
     }
 
@@ -170,9 +172,9 @@ void Editor::area_contain()
         if(rect.contains(points.at(i)->getPosition().x, points.at(i)->getPosition().y))
         {
             if(area_type == 1)
-            points.at(i)->setSelected(true);
+                points.at(i)->setSelected(true);
             else if(area_type == 2)
-            points.at(i)->setPressed(true);
+                points.at(i)->setPressed(true);
         }
     }
 }
@@ -198,12 +200,12 @@ void Editor::select_all()
             for(unsigned int i = 0; i < points.size(); i++)
             {
                 if(!points.at(i)->selected)
-                points.at(i)->setSelected(true);
+                    points.at(i)->setSelected(true);
             }
         }
     }
     else
-    selectall_released = true;
+        selectall_released = true;
 }
 
 void Editor::press_all()
@@ -215,42 +217,40 @@ void Editor::press_all()
             for(unsigned int i = 0; i < points.size(); i++)
             {
                 if(!points.at(i)->pressed)
-                points.at(i)->setPressed(true);
+                    points.at(i)->setPressed(true);
             }
         }
     }
     else
-    pressall_released = true;
+        pressall_released = true;
 }
 
 void Editor::check_connection(const shared_ptr<Point> & test)
 {
     for(unsigned int p = 0; p < points.size(); p++)
     {
-       for(unsigned int i = 0; i < points.at(p)->connected.size(); i++)
-       {
-           if(points.at(p)->connected.at(i).node_ptr1 == test || points.at(p)->connected.at(i).node_ptr2 == test)
-           {
+        for(unsigned int i = 0; i < points.at(p)->connected.size(); i++)
+        {
+            if(points.at(p)->connected.at(i).node_ptr1 == test || points.at(p)->connected.at(i).node_ptr2 == test)
+            {
                 points.at(p)->connected.begin();
-                //points.at(p)->connected.at(i).node_ptr1 = nullptr;
-                //points.at(p)->connected.at(i).node_ptr2 = nullptr;
                 points.at(p)->connected.erase(points.at(p)->connected.begin()+i);
                 check_connection(test);
-           }
-       }
+            }
+        }
     }
 }
 
 void Editor::delete_point(const shared_ptr<Point> & ptr)
 {
-    for(unsigned int i = 0; i < points.size(); i++)
-    {
-        if(points.at(i) == ptr)
+    if(points.size()>0)
+        for(unsigned int i = 0; i < points.size(); i++)
         {
-            //points.at(i) = nullptr;
-            points.erase(points.begin()+i);
+            if(points.at(i) == ptr)
+            {
+                points.erase(points.begin()+i);
+            }
         }
-    }
 }
 
 void Editor::delete_points()
@@ -260,8 +260,11 @@ void Editor::delete_points()
         while(true)
         {
             if(Point::selected_ptrs.size() == 0)
-            return;
-            create_snapshot();
+            {
+                create_snapshot();
+                return;
+            }
+
             shared_ptr<Point> ptr = Point::selected_ptrs.at(0);
             Point::erase_selected(ptr);
             Point::erase_pressed(ptr);
@@ -276,102 +279,95 @@ void Editor::add_curve_on_cursor()
 {
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Y) && key_addnew_released_curve == true)
     {
-        create_snapshot();
-
-        shared_ptr<Point> ptr1 = make_shared<Point>(Point(sf::Vector2f(Inputs::getInputs().mousePos().x-50, Inputs::getInputs().mousePos().y)));
+        shared_ptr<Point> ptr1 = make_shared<Point>(sf::Vector2f(Inputs::getInputs().mousePos().x-50, Inputs::getInputs().mousePos().y));
         points.push_back(ptr1);
-        shared_ptr<Point> ptr2 = make_shared<Point>(Point(sf::Vector2f(Inputs::getInputs().mousePos().x+50, Inputs::getInputs().mousePos().y)));
+        shared_ptr<Point> ptr2 = make_shared<Point>(sf::Vector2f(Inputs::getInputs().mousePos().x+50, Inputs::getInputs().mousePos().y));
         points.push_back(ptr2);
-        shared_ptr<Point> ptr3 = make_shared<Point>(Point(sf::Vector2f(Inputs::getInputs().mousePos().x, Inputs::getInputs().mousePos().y)));
+        shared_ptr<Point> ptr3 = make_shared<Point>(sf::Vector2f(Inputs::getInputs().mousePos().x, Inputs::getInputs().mousePos().y));
         points.push_back(ptr3);
 
         ptr3->connect_this(ptr1, ptr2);
-
         key_addnew_released_curve = false;
+        create_snapshot();
     }
     else if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Y))
-    key_addnew_released_curve = true;
+        key_addnew_released_curve = true;
 }
 
 void Editor::add_point_on_cursor()
 {
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::N) && key_addnew_released == true)
     {
-        create_snapshot();
-
-        shared_ptr<Point> ptr = make_shared<Point>(Point(Inputs::getInputs().mousePos()));
+        shared_ptr<Point> ptr = make_shared<Point>(Inputs::getInputs().mousePos());
         points.push_back(ptr);
         key_addnew_released = false;
 
         if(Point::use_grid == true)
-        {
             ptr->set_on_grid_position();
-        }
+
+        create_snapshot();
     }
     else if(!sf::Keyboard::isKeyPressed(sf::Keyboard::N))
-            key_addnew_released = true;
+        key_addnew_released = true;
 }
 
 void Editor::delete_all()
 {
-    if(points.size() > 0)
-    {
-        create_snapshot();
-
-        while(true)
-        {
-            if(points.size() == 0)
-            return;
-
-            shared_ptr<Point> ptr = points.at(0);
-            Point::erase_selected(ptr);
-            Point::erase_pressed(ptr);
-            check_connection(ptr);
-            delete_point(ptr);
-            //delete ptr;
-        }
-    }
-
+    history.clear();
+    points.clear();
+    Point::selected_ptrs.clear();
+    Point::pressed_ptrs.clear();
 }
 
 void Editor::select_point()
 {
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-        {
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+    {
+        if(Point::connect())
             create_snapshot();
-            Point::connect();
-            sf::sleep(sf::milliseconds(700));
-        }
+        sf::sleep(sf::milliseconds(400));
+    }
 
-        Point::onmouse = false;
+    Point::onmouse = false;
+    for(unsigned int i = 0; i < points.size(); i++)
+    {
+        points.at(i)->select_press(!bg_pressed);
+    }
+
+    if(Inputs::getInputs().get(sf::Mouse::Left))
+    {
+        bool diff = true;
         for(unsigned int i = 0; i < points.size(); i++)
         {
-            points.at(i)->select_press(!bg_pressed);
+            if(points.at(i)->mouse_contain())
+            {
+                diff = false;
+            }
         }
 
-        if(Inputs::getInputs().get(sf::Mouse::Left))
+        if(diff && Point::pressed_ptrs.size() > 0 && !bg_pressed)
         {
-            bool diff = true;
-            for(unsigned int i = 0; i < points.size(); i++)
+            Point::calculate_diff();
+            bg_pressed = true;
+        }
+        else if(bg_pressed && Inputs::getInputs().get(sf::Mouse::Left) && Point::pressed_ptrs.size() > 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
             {
-                if(points.at(i)->mouse_contain())
-                {
-                    diff = false;
-                }
+                points_dragged = true;
+                Point::move_group();
             }
 
-            if(diff && Point::pressed_ptrs.size() > 0 && !bg_pressed) //>1
-            {
-                Point::calculate_diff();
-                bg_pressed = true;
-            }
-            else if(bg_pressed && Inputs::getInputs().get(sf::Mouse::Left) && Point::pressed_ptrs.size() > 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))  //>1
-                Point::move_group();
-        }
-        else bg_pressed = false;
+    }
+    else bg_pressed = false;
+
+    if(points_dragged && !Inputs::getInputs().get(sf::Mouse::Left))
+    {
+        points_dragged = false;
+        create_snapshot();
+    }
+
 }
 
-bool Editor::move_curve()
+void Editor::move_curve()
 {
     /* true -> edit | false -> no */
     if(Inputs::getInputs().get(sf::Mouse::Left))
@@ -381,13 +377,13 @@ bool Editor::move_curve()
 
         if(Point::pressed_ptrs.size() == 1 && !sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
         {
-            for(unsigned int i = 0; i < points.size() ; i++)
+            for(unsigned int i = 0; i < points.size(); i++)
             {
                 points.at(i)->move();
             }
+            points_dragged = true;
         }
     }
-    return false;
 }
 
 void Editor::draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Color & color)
@@ -411,18 +407,18 @@ void Editor::draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf:
 void Editor::draw_connections()
 {
     if(draw_con)
-    for(unsigned int i = 0; i < points.size(); i++)
-    {
-        for(unsigned int c = 0; c < points.at(i)->connected.size(); c++)
+        for(unsigned int i = 0; i < points.size(); i++)
         {
-            draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr1->getPosition(), Colors::get().getColor(Colors::LINK));
-            draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr2->getPosition(), Colors::get().getColor(Colors::LINK));
-            /*float dist = 0;   //link length
-            dist += abs(sqrt( pow(points.at(i)->getPosition().x-points.at(i)->connected.at(c).node_ptr1->getPosition().x, 2)  +  pow(points.at(i)->getPosition().y-points.at(i)->connected.at(c).node_ptr1->getPosition().y, 2) ));
-            dist += abs(sqrt( pow(points.at(i)->getPosition().x-points.at(i)->connected.at(c).node_ptr2->getPosition().x, 2)  +  pow(points.at(i)->getPosition().y-points.at(i)->connected.at(c).node_ptr2->getPosition().y, 2) ));
-            cout<<dist<<endl;*/
+            for(unsigned int c = 0; c < points.at(i)->connected.size(); c++)
+            {
+                draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr1->getPosition(), Colors::get().getColor(Colors::LINK));
+                draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr2->getPosition(), Colors::get().getColor(Colors::LINK));
+                /*float dist = 0;   //link length
+                dist += abs(sqrt( pow(points.at(i)->getPosition().x-points.at(i)->connected.at(c).node_ptr1->getPosition().x, 2)  +  pow(points.at(i)->getPosition().y-points.at(i)->connected.at(c).node_ptr1->getPosition().y, 2) ));
+                dist += abs(sqrt( pow(points.at(i)->getPosition().x-points.at(i)->connected.at(c).node_ptr2->getPosition().x, 2)  +  pow(points.at(i)->getPosition().y-points.at(i)->connected.at(c).node_ptr2->getPosition().y, 2) ));
+                cout<<dist<<endl;*/
+            }
         }
-    }
 }
 
 void Editor::draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vector2f& p3)
@@ -439,21 +435,21 @@ void Editor::draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vect
         y = pow(( 1 - t ), 3)*p1.y + 3 * pow(( 1 - t ), 2) * t * p2.y + 3*( 1 - t )*pow(t, 2) * p3.y+pow(t, 3)*p4.y;
 
         if(draw_cur)
-        draw_pixel(sf::Vector2f(x, y));//segment vertex
+            draw_pixel(sf::Vector2f(x, y));//segment vertex
 
         if(t > 0)
         {
-           if(draw_lines)
-           {
-               draw_line(last, sf::Vector2f(x, y), Colors::get().getColor(Colors::CURVE));
-           }
-           segments++;
-                /*
-                dist += abs(sqrt( pow(last.x-x, 2)  +  pow(last.y-y, 2) ));
-                float a = abs(last.x-x);
-                float b = abs(last.y-y);
-                float c = sqrt(pow(a, 2) + pow(b, 2));
-                */
+            if(draw_lines)
+            {
+                draw_line(last, sf::Vector2f(x, y), Colors::get().getColor(Colors::CURVE));
+            }
+            segments++;
+            /*
+            dist += abs(sqrt( pow(last.x-x, 2)  +  pow(last.y-y, 2) ));
+            float a = abs(last.x-x);
+            float b = abs(last.y-y);
+            float c = sqrt(pow(a, 2) + pow(b, 2));
+            */
         }
 
         last = sf::Vector2f(x, y);
@@ -461,12 +457,12 @@ void Editor::draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vect
     //cout<<" dist = "<<dist<<endl;
 
     if(false)
-    for(float t = 0; t <= 1; t +=0.005f)
-    {
-        x = pow(( 1 - t ), 3)*p1.x + 3 * pow(( 1 - t ), 2) * t * p2.x + 3*( 1 - t )*pow(t, 2) * p3.x+pow(t, 3)*p4.x;
-        y = pow(( 1 - t ), 3)*p1.y + 3 * pow(( 1 - t ), 2) * t * p2.y + 3*( 1 - t )*pow(t, 2) * p3.y+pow(t, 3)*p4.y;
-        draw_pixel(sf::Vector2f(x, y));
-    }
+        for(float t = 0; t <= 1; t +=0.005f)
+        {
+            x = pow(( 1 - t ), 3)*p1.x + 3 * pow(( 1 - t ), 2) * t * p2.x + 3*( 1 - t )*pow(t, 2) * p3.x+pow(t, 3)*p4.x;
+            y = pow(( 1 - t ), 3)*p1.y + 3 * pow(( 1 - t ), 2) * t * p2.y + 3*( 1 - t )*pow(t, 2) * p3.y+pow(t, 3)*p4.y;
+            draw_pixel(sf::Vector2f(x, y));
+        }
 }
 
 void Editor::draw_curve()
@@ -536,25 +532,25 @@ void Editor::save_segments_to_file(string filename)
         {
             for(unsigned int i = 0; i < points.at(p)->connected.size(); i++)
             {
-                    p1 = points.at(p)->connected.at(i).node_ptr1->getPosition();
-                    p2 = points.at(p)->getPosition();
-                    p3 = points.at(p)->connected.at(i).node_ptr2->getPosition();
-                    p4 = p3;
+                p1 = points.at(p)->connected.at(i).node_ptr1->getPosition();
+                p2 = points.at(p)->getPosition();
+                p3 = points.at(p)->connected.at(i).node_ptr2->getPosition();
+                p4 = p3;
+                {
+                    sf::Vector2f last(0, 0);
+                    float x, y;
+                    for(float t = 0; t <= 1; t +=draw_step)
                     {
-                        sf::Vector2f last(0, 0);
-                        float x, y;
-                        for(float t = 0; t <= 1; t +=draw_step)
+                        x = pow(( 1 - t ), 3)*p1.x + 3 * pow(( 1 - t ), 2) * t * p2.x + 3*( 1 - t )*pow(t, 2) * p3.x+pow(t, 3)*p4.x;
+                        y = pow(( 1 - t ), 3)*p1.y + 3 * pow(( 1 - t ), 2) * t * p2.y + 3*( 1 - t )*pow(t, 2) * p3.y+pow(t, 3)*p4.y;
+                        if(t > 0)
                         {
-                            x = pow(( 1 - t ), 3)*p1.x + 3 * pow(( 1 - t ), 2) * t * p2.x + 3*( 1 - t )*pow(t, 2) * p3.x+pow(t, 3)*p4.x;
-                            y = pow(( 1 - t ), 3)*p1.y + 3 * pow(( 1 - t ), 2) * t * p2.y + 3*( 1 - t )*pow(t, 2) * p3.y+pow(t, 3)*p4.y;
-                            if(t > 0)
-                            {
-                               file<<last.x<<" "<<last.y<<" "<<x<<" "<<y<<endl;
-                               fcnt++;
-                            }
-                            last = sf::Vector2f(x, y);
+                            file<<last.x<<" "<<last.y<<" "<<x<<" "<<y<<endl;
+                            fcnt++;
                         }
+                        last = sf::Vector2f(x, y);
                     }
+                }
             }
         }
     }
@@ -568,9 +564,9 @@ void Editor::save_segments_to_file(string filename)
         ++lines_count;
 
     if(fcnt == lines_count)
-    gui->show_info("Export success", number_to_string<int>(lines_count)+" segments was exported to\n"+filename);
+        gui->show_info("Export success", number_to_string<int>(lines_count)+" segments was exported to\n"+filename);
     else
-    gui->show_info("Export invalid", number_to_string<int>(lines_count)+" != "+number_to_string<int>(fcnt));
+        gui->show_info("Export invalid", number_to_string<int>(lines_count)+" != "+number_to_string<int>(fcnt));
     file.close();
 }
 
@@ -622,7 +618,6 @@ void Editor::load_from_file(string filename)
     }
 
     file>>valid_file;
-
     if(valid_file != file_pr)
     {
         gui->show_info("Error", filename+"\nfile is invalid.");
@@ -632,48 +627,46 @@ void Editor::load_from_file(string filename)
 
     delete_all();
     current_filename = filename;
-    //float tmp;
+
     float x, y;
     int pts, p_id;
     file>>pts;
     for(int i = 0; i < pts; i++)
     {
         file>>p_id>>x>>y;
-            shared_ptr<Point> ptr = make_shared<Point>(Point(sf::Vector2f(x, y)));
-            ptr->ident = p_id;
-            points.push_back(ptr);
+        shared_ptr<Point> ptr = make_shared<Point>(sf::Vector2f(x, y));
+        ptr->ident = p_id;
+        points.push_back(ptr);
     }
-
     while(true)
     {
-
         int id, p1, p2;
-            file>>id>>p1>>p2;
+        file>>id>>p1>>p2;
 
-            shared_ptr<Point> tmp_node = get_point_by_id(id);
-            Point::node_ptr = tmp_node;
-            shared_ptr<Point> tmp_points[2];
-            tmp_points[0] = get_point_by_id(p1);
-            tmp_points[1] = get_point_by_id(p2);
+        shared_ptr<Point> tmp_node = get_point_by_id(id);
+        Point::node_ptr = tmp_node;
+        shared_ptr<Point> tmp_points[2];
+        tmp_points[0] = get_point_by_id(p1);
+        tmp_points[1] = get_point_by_id(p2);
 
-            if(tmp_points[0] == nullptr || tmp_points[1] == nullptr || tmp_node == nullptr)
+        if(tmp_points[0] == nullptr || tmp_points[1] == nullptr || tmp_node == nullptr)
+        {
+            //Point::node_ptr = nullptr;
+        }
+        else
+        {
+            tmp_points[0]->setSelected(true);
+            tmp_points[1]->setSelected(true);
+
+            if(tmp_node != nullptr)
             {
-                Point::node_ptr = nullptr;
+                tmp_node->connect();
             }
-            else
-            {
-                tmp_points[0]->setSelected(true);//cout<<p1<<" selected "<<tmp_points[0]<<endl;
-                tmp_points[1]->setSelected(true);//cout<<p2<<" selected "<<tmp_points[1]<<endl;
 
-                if(tmp_node != nullptr)
-                {
-                    tmp_node->connect();
-                }
-
-                tmp_points[0]->setSelected(false);
-                tmp_points[1]->setSelected(false);
-                Point::node_ptr = nullptr;
-            }
+            tmp_points[0]->setSelected(false);
+            tmp_points[1]->setSelected(false);
+            Point::node_ptr = nullptr;
+        }
 
         if(file.eof())
         {
@@ -736,7 +729,7 @@ bool Editor::check_if_unsaved_changes()
 void Editor::update()
 {
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Delete) || sf::Keyboard::isKeyPressed(sf::Keyboard::X))
-    delete_points();
+        delete_points();
 
     area();
     if(drawarea_released)
@@ -764,36 +757,77 @@ void Editor::unsaved_change()
     }
 }
 
-void Editor::create_snapshot()
+void Editor::apply_it(const auto & h_item)
 {
-    return;
-    cout<<"create snapshot"<<endl;
+    points.clear();
+    for(unsigned int i = 0; i < h_item.size(); i++)
+    {
+        points.push_back(get<0>(h_item.at(i)));
+        points.back()->connected = get<1>(h_item.at(i));
+        points.back()->setPosition(get<2>(h_item.at(i)));
+    }
 
-    vector<pair<shared_ptr<Point>, vector<Link>>>history_el;
-
+    Point::selected_ptrs.clear();
+    Point::pressed_ptrs.clear();
     for(unsigned int i = 0; i < points.size(); i++)
     {
-        history_el.push_back(make_pair(points.at(i), points.at(i)->connected));
+        if(points.at(i)->selected)
+            Point::selected_ptrs.push_back(points.at(i));
+        if(points.at(i)->pressed)
+            Point::pressed_ptrs.push_back(points.at(i));
+    }
+}
+
+void Editor::create_snapshot()
+{
+    if(history_iter+1 != history.size() && history.size() > 0)
+    {
+        if(history_iter+1 < history.size())
+        history.erase(history.begin()+history_iter+1, history.end());
+    }
+
+    vector<tuple<shared_ptr<Point>, vector<Link>, sf::Vector2f>>history_el;
+    for(unsigned int i = 0; i < points.size(); i++)
+    {
+        history_el.push_back(make_tuple(points.at(i), points.at(i)->connected, points.at(i)->getPosition()));
     }
     history.push_back(history_el);
+    history_iter = history.size()-1;
+}
 
+void Editor::clear_changes_history()
+{
+    history.clear();
+    create_snapshot();
 }
 
 void Editor::undo()
 {
+    history_iter--;
+
+    if(history_iter < 0)
+        history_iter = 0;
+    else if(history_iter >= history.size())
+        history_iter = history.size()-1;
+
     if(history.size() > 0)
     {
-        history.back().back().first;
-        points.clear();
-        cout<<"A "<<typeid(history.back().back()).name();
+        apply_it(history.at(history_iter));
+    }
+}
 
-        for(unsigned int i = 0; i < history.back().size(); i++)
-        {
-            points.push_back(history.back().at(i).first);
-            points.back()->connected = history.back().at(i).second;
-            cout<<"pushed = "<<history.back().at(i).first->ident<<endl;
-        }
-        history.erase(history.end());
+void Editor::redo()
+{
+    history_iter++;
+
+    if(history_iter < 0)
+        history_iter = 0;
+    else if(history_iter >= history.size())
+        history_iter = history.size()-1;
+
+    if(history.size() > 0)
+    {
+        apply_it(history.at(history_iter));
     }
 }
 

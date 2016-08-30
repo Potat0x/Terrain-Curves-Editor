@@ -22,11 +22,15 @@ class Gui
     sf::Clock update_clock;
     ////
     Box::Ptr main_menu_box;
-    Button::Ptr file, view, settings, help, about;
+    Button::Ptr file, edit, view, settings, help, about;
     //
     Box::Ptr file_box;
     Button::Ptr create, open, save, save_as, generate;
     void show_filemenu(bool s);
+    //
+    Box::Ptr edit_box;
+    Button::Ptr undo, redo, clear_history;
+    void show_editmenu(bool s);
     //
     Box::Ptr view_box;
     CheckButton::Ptr link, curve, points, segments, grid;

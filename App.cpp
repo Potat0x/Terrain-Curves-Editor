@@ -2,21 +2,32 @@
 
 App::App()
 {
+    bool fullscreen = false;
     sf::Vector2f winsize(800, 600);
     app_title = "Terrain Curves Editor";
-    window.create(sf::VideoMode(winsize.x, winsize.y), app_title);
-    //window.create(sf::VideoMode(1366, 768), app_title, sf::Style::Fullscreen);
-    window.setVerticalSyncEnabled(true);
-    window.setPosition(sf::Vector2i(0, 0));
 
-    gui = shared_ptr<Gui>(new Gui(window));
+    if(fullscreen)
+    {
+        window.create(sf::VideoMode::getDesktopMode(), app_title, sf::Style::Fullscreen);
+    }
+    else
+    {
+        window.create(sf::VideoMode(winsize.x, winsize.y), app_title);
+        if(winsize.x < sf::VideoMode::getDesktopMode().width && winsize.y < sf::VideoMode::getDesktopMode().height)
+        window.setPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width-winsize.x)/2, (sf::VideoMode::getDesktopMode().height-winsize.y)/2));
+        else window.setPosition(sf::Vector2i(0, 0));
+    }
+    gui = make_shared<Gui>(window);
     Editor::get_Editor().gui = gui;
 
     Inputs::win = &window;
-    window.resetGLStates();
 
-    pan_mouse_mid_released = true;
-    view = sf::View(sf::Vector2f(winsize.x/2, winsize.y/2), sf::Vector2f(winsize.x, winsize.y));
+    if(fullscreen)
+    view = sf::View(sf::Vector2f(sf::VideoMode::getDesktopMode().width/2, sf::VideoMode::getDesktopMode().height/2), sf::Vector2f(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height));
+    else view = sf::View(sf::Vector2f(winsize.x/2, winsize.y/2), sf::Vector2f(winsize.x, winsize.y));
+
+    window.setVerticalSyncEnabled(true);
+    window.resetGLStates();
 }
 
 App & App::getApp()
@@ -37,6 +48,7 @@ sf::RenderWindow & App::get_sfml_window()
 
 void App::run()
 {
+    Editor::get_Editor().create_snapshot();
     while (window.isOpen())
     {
         sf::Event event;
@@ -90,8 +102,15 @@ void App::run()
             {
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
                 {
-                    cout<<"ctrlz"<<endl;
-                    Editor::get_Editor().undo();
+                    if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
+                    {
+                        Editor::get_Editor().redo();
+                    }
+                    else
+                    {
+                        Editor::get_Editor().undo();
+                    }
+
                 }
             }
 

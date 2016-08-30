@@ -35,6 +35,10 @@ Gui::Gui(sf::RenderWindow & sfml_window)
     main_menu_box->Pack(file);
     file->GetSignal(Button::OnLeftClick).Connect(bind(&Gui::show_filemenu, this, true));
 
+    edit = Button::Create("Edit");
+    main_menu_box->Pack(edit);
+    edit->GetSignal(Button::OnLeftClick).Connect(bind(&Gui::show_editmenu, this, true));
+
     view = Button::Create("View");
     main_menu_box->Pack(view);
     view->GetSignal(Button::OnLeftClick).Connect(bind(&Gui::show_viewmenu, this, true));
@@ -72,6 +76,19 @@ Gui::Gui(sf::RenderWindow & sfml_window)
     generate = Button::Create("Export");
     generate->GetSignal(Button::OnLeftClick).Connect(bind(&Gui::export_to_file, this));
     file_box->Pack(generate);
+    //
+    edit_box = Box::Create(Box::Orientation::VERTICAL);
+    edit_box->SetPosition(sf::Vector2f(edit.get()->GetAllocation().left, edit.get()->GetAllocation().height));
+
+    undo = Button::Create("Undo");
+    undo->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::undo, &Editor::get_Editor()));
+    edit_box->Pack(undo);
+    redo = Button::Create("Redo");
+    redo->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::redo, &Editor::get_Editor()));
+    edit_box->Pack(redo);
+    clear_history = Button::Create("Clear history");
+    clear_history->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::clear_changes_history, &Editor::get_Editor()));
+    edit_box->Pack(clear_history);
     //
     view_box = Box::Create(Box::Orientation::VERTICAL);
     view_box->SetPosition(sf::Vector2f(view.get()->GetAllocation().left, view.get()->GetAllocation().height));
@@ -356,12 +373,14 @@ Gui::Gui(sf::RenderWindow & sfml_window)
     desktop.Add(fps_label);
     desktop.Add(status_window);
     desktop.Add(file_box);
+    desktop.Add(edit_box);
     desktop.Add(view_window);
     desktop.Add(about_window);
     desktop.Add(settings_window);
     desktop.Add(help_window);
     desktop.Add(new_file_window);
     file_box.get()->Show(false);
+    edit_box.get()->Show(false);
     view_window.get()->Show(false);
     settings_window.get()->Show(false);
     help_window.get()->Show(false);
@@ -605,6 +624,7 @@ void Gui::show_help_dialog(bool s)
 
     if(s)
     {
+        show_editmenu(false);
         show_viewmenu(false);
         show_filemenu(false);
         show_settingsmenu(false);
@@ -622,6 +642,7 @@ void Gui::show_about_dialog(bool s)
     if(s)
     {
         show_viewmenu(false);
+        show_editmenu(false);
         show_filemenu(false);
         show_settingsmenu(false);
         show_help_dialog(false);
@@ -641,6 +662,7 @@ void Gui::show_settingsmenu(bool s)
 
     if(s)
     {
+        show_editmenu(false);
         show_viewmenu(false);
         show_filemenu(false);
         show_about_dialog(false);
@@ -658,6 +680,7 @@ void Gui::show_viewmenu(bool s)
     if(s)
     {
         show_filemenu(false);
+        show_editmenu(false);
         show_settingsmenu(false);
         show_about_dialog(false);
         show_help_dialog(false);
@@ -673,6 +696,24 @@ void Gui::show_filemenu(bool s)
 
     if(s)
     {
+        show_editmenu(false);
+        show_viewmenu(false);
+        show_settingsmenu(false);
+        show_about_dialog(false);
+        show_help_dialog(false);
+    }
+}
+
+void Gui::show_editmenu(bool s)
+{
+    if(!edit_box.get()->IsGloballyVisible())
+    {
+        edit_box.get()->Show(s);
+    } else edit_box.get()->Show(false);
+
+    if(s)
+    {
+        show_filemenu(false);
         show_viewmenu(false);
         show_settingsmenu(false);
         show_about_dialog(false);

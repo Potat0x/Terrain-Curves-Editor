@@ -15,7 +15,7 @@ class Point : public std::enable_shared_from_this<Point>
 {
 
 public:
-static bool after_group;
+    static bool after_group;
     static vector<shared_ptr<Point>>pressed_ptrs;
     static vector<shared_ptr<Point>>selected_ptrs;
 
@@ -29,7 +29,7 @@ static bool after_group;
     bool pressed;
     static bool onmouse;//cursor above any point
 
-    Point(sf::Vector2f pos);
+    Point(const sf::Vector2f& pos);
     ~Point();
     static void init();
 
@@ -50,6 +50,7 @@ public:
     void move();
     bool mouse_contain();
     sf::Vector2f getPosition();
+    void setPosition(const sf::Vector2f & pos);
     void set_on_grid_position();
     void connect_this(const shared_ptr<Point>& ptr1, const shared_ptr<Point>& ptr2);
     void setPressed(bool p);

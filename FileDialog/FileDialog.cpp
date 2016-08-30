@@ -38,7 +38,7 @@ void FileDialog::update()
             tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::listFiles, this, path));
             else if(folders.at(i) == "..")
             tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::listFiles, this, go_parent_path(path)));
-            tmp_ei = nullptr;
+            //tmp_ei = nullptr;
         }
 
         for(unsigned int i = 0; i < files.size(); i++)
@@ -46,7 +46,7 @@ void FileDialog::update()
             tmp_ei = new ExplorerItem(1, files.at(i));
             items.push_back(tmp_ei);
             tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::fileClicked, this, files.at(i)));
-            tmp_ei = nullptr;
+            //tmp_ei = nullptr;
         }
 
         //cout<<"Pack start"<<endl;

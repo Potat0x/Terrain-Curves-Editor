@@ -17,7 +17,7 @@ void Point::init()
     grid = sf::Vector2i(40, 40);
 }
 
-Point::Point(sf::Vector2f pos)
+Point::Point(const sf::Vector2f &pos)
 {
     shape = sf::RectangleShape(sf::Vector2f(12, 12));
     shape.setFillColor(Colors::get().getColor(Colors::POINT));
@@ -46,7 +46,7 @@ bool Point::select_press(bool can_press)
     if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && pressed_ptrs.size() == 1)
     {
         if(after_group == false)
-        can_press = true;
+            can_press = true;
         else
         {
             after_group = true;
@@ -66,9 +66,9 @@ bool Point::select_press(bool can_press)
     bool press = false;
     bool select = false;
     if(Inputs::getInputs().get(sf::Mouse::Left))
-    press = true;
+        press = true;
     else if(Inputs::getInputs().get(sf::Mouse::Right))
-    select = true;
+        select = true;
     else
     {
         lpm_pressed = false;
@@ -80,47 +80,48 @@ bool Point::select_press(bool can_press)
         onmouse = true;
         if(is_node == false)
         {
-                if(press && can_press)
+            if(press && can_press)
+            {
+                if( (pressed_ptrs.size() == 1 && pressed_ptrs.at(0).get() == this) || pressed_ptrs.size() == 0 || (pressed_ptrs.size() > 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)))
                 {
-                    if( (pressed_ptrs.size() == 1 && pressed_ptrs.at(0).get() == this) || pressed_ptrs.size() == 0 || (pressed_ptrs.size() > 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)))
+                    lpm_pressed = true;
+                    setPressed(true);
+                }
+                else if(lpm_released && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+                {
+                    if(pressed)
+                    {
+                        lpm_pressed = true;
+                        setPressed(false);
+                    }
+                    else
                     {
                         lpm_pressed = true;
                         setPressed(true);
-                    }else if(lpm_released && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
-                    {
-                        if(pressed)
-                        {
-                            lpm_pressed = true;
-                            setPressed(false);
-                        }
-                        else
-                        {
-                            lpm_pressed = true;
-                            setPressed(true);
-                        }
-                        lpm_released = false;
-
                     }
+                    lpm_released = false;
 
-                    return false;
                 }
-                else if(select)
+
+                return false;
+            }
+            else if(select)
+            {
+                ppm_pressed = true;
+                if(ppm_released)
                 {
-                    ppm_pressed = true;
-                    if(ppm_released)
+                    if(selected)
                     {
-                        if(selected)
-                        {
-                            setSelected(false);
-                        }
-                        else
-                        {
-                            setSelected(true);
-                        }
-                        ppm_released = false;
+                        setSelected(false);
                     }
-                    return false;
+                    else
+                    {
+                        setSelected(true);
+                    }
+                    ppm_released = false;
                 }
+                return false;
+            }
         }
         if(Inputs::getInputs().get(sf::Mouse::Middle))
         {
@@ -170,7 +171,7 @@ bool Point::select_press(bool can_press)
                     if(!lpm_pressed)
                     {
                         if(pressed_ptrs.size() > 1)
-                        after_group = true;
+                            after_group = true;
 
                         setPressed(false);
                         lpm_pressed = false;
@@ -181,9 +182,9 @@ bool Point::select_press(bool can_press)
         }
         else if(Inputs::getInputs().get(sf::Mouse::Middle))
         {
-                   node_ptr->shape.setFillColor(Colors::get().getColor(Colors::POINT));
-                   node_ptr->is_node = false;
-                   node_ptr = nullptr;
+            node_ptr->shape.setFillColor(Colors::get().getColor(Colors::POINT));
+            node_ptr->is_node = false;
+            node_ptr = nullptr;
         }
     }
     return false;
@@ -204,7 +205,7 @@ bool Point::check_connection()
     for(unsigned int i = 0; i < node_ptr->connected.size(); i++)
     {
         if((node_ptr->connected.at(i).node_ptr1 == selected_ptrs.at(0) && node_ptr->connected.at(i).node_ptr2 == selected_ptrs.at(1))  ||
-           (node_ptr->connected.at(i).node_ptr1 == selected_ptrs.at(1) && node_ptr->connected.at(i).node_ptr2 == selected_ptrs.at(0))
+                (node_ptr->connected.at(i).node_ptr1 == selected_ptrs.at(1) && node_ptr->connected.at(i).node_ptr2 == selected_ptrs.at(0))
           )
         {
             return true;
@@ -221,15 +222,20 @@ void Point::connect_this(const shared_ptr<Point>& ptr1, const shared_ptr<Point>&
 
 bool Point::connect()
 {
+    if(selected_ptrs.size() != 2)
+        return false;
+
     if(node_ptr != nullptr && selected_ptrs.size() == 2)
     {
         if(check_connection() == false)
         {
             Editor::get_Editor().unsaved_change();
             node_ptr->connected.push_back(Link(selected_ptrs.at(0), selected_ptrs.at(1)));
+            cout<<"connect() true";
             return true;
         }
     }
+
     return false;
 }
 
@@ -247,12 +253,15 @@ void Point::erase_pressed(const shared_ptr<Point>& ptr)
 
 void Point::erase_selected(const shared_ptr<Point>& ptr)
 {
-    for(unsigned int i = 0; i < selected_ptrs.size(); i++)
+    if(selected_ptrs.size() > 0)
     {
-        if(selected_ptrs.at(i) == ptr)
+        for(unsigned int i = 0; i < selected_ptrs.size(); i++)
         {
-            selected_ptrs.erase(selected_ptrs.begin()+i);
-            return;
+            if(selected_ptrs.at(i) == ptr)
+            {
+                selected_ptrs.erase(selected_ptrs.begin()+i);
+                return;
+            }
         }
     }
 }
@@ -281,9 +290,8 @@ void Point::setPressed(bool p)
         pressed = false;
         shape.setFillColor(Colors::get().getColor(Colors::POINT));
         if(selected)
-        shape.setFillColor(Colors::get().getColor(Colors::POINT_SELECTED));
+            shape.setFillColor(Colors::get().getColor(Colors::POINT_SELECTED));
     }
-   // cout<<"pressed = "<<pressed_ptrs.size()<<endl;
 }
 
 void Point::setSelected(bool s)
@@ -307,13 +315,18 @@ void Point::setSelected(bool s)
         selected = false;
         shape.setFillColor(Colors::get().getColor(Colors::POINT));
         if(pressed)
-        shape.setFillColor(Colors::get().getColor(Colors::POINT_PRESSED));
+            shape.setFillColor(Colors::get().getColor(Colors::POINT_PRESSED));
     }
 }
 
 sf::Vector2f Point::getPosition()
 {
     return shape.getPosition();
+}
+
+void Point::setPosition(const sf::Vector2f & pos)
+{
+    shape.setPosition(pos);
 }
 
 void Point::draw(sf::RenderWindow * win)
@@ -342,17 +355,13 @@ void Point::move()
 {
     if(pressed)
     {
-        //if(pressed_ptrs.size() == 1)
-
         Editor::get_Editor().unsaved_change();
-        {
-            if(use_grid == true)
-            set_on_grid_position();
-            else
-            {
-                shape.setPosition(Inputs::getInputs().mousePos());
-            }
 
+        if(use_grid == true)
+            set_on_grid_position();
+        else
+        {
+            shape.setPosition(Inputs::getInputs().mousePos());
         }
 
     }
