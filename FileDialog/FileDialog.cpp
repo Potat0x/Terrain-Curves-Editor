@@ -20,7 +20,7 @@ void FileDialog::fileClicked(const string & filename)
 
 void FileDialog::update()
 {
-   if(refresh_list)
+    if(refresh_list)
     {
         filename_entry->SetText("");
         path_entry->SetText(path);
@@ -33,12 +33,12 @@ void FileDialog::update()
             tmp_ei = new ExplorerItem(0, folders.at(i));
             items.push_back(tmp_ei);
             if(folders.at(i) != "." && folders.at(i) != "..")
-            tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::listFiles, this, path+"\\"+folders.at(i)));
+                tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::listFiles, this, path+"\\"+folders.at(i)));
             else if(folders.at(i) == ".")
-            tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::listFiles, this, path));
+                tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::listFiles, this, path));
             else if(folders.at(i) == "..")
-            tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::listFiles, this, go_parent_path(path)));
-            //tmp_ei = nullptr;
+                tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::listFiles, this, go_parent_path(path)));
+            tmp_ei = nullptr;
         }
 
         for(unsigned int i = 0; i < files.size(); i++)
@@ -46,29 +46,24 @@ void FileDialog::update()
             tmp_ei = new ExplorerItem(1, files.at(i));
             items.push_back(tmp_ei);
             tmp_ei->connection_serial = tmp_ei->get()->GetSignal(Button::OnLeftClick).Connect(bind(&FileDialog::fileClicked, this, files.at(i)));
-            //tmp_ei = nullptr;
+            tmp_ei = nullptr;
         }
 
-        //cout<<"Pack start"<<endl;
-        //sf::Clock clock;
-        //clock.restart();
         for(unsigned int i = 0; i < items.size(); i++)
         {
             if(items[i]->to_delete == false)
-            explorer_box->Pack(items[i]->get());
+                explorer_box->Pack(items[i]->get());
         }
-        //cout<<"Pack end: "<<clock.getElapsedTime().asSeconds()<<endl;
-        //int iters = 0;
+
         unsigned int i = 0;
         unsigned int max = 0;
 
         while(true)
-        {//iters++;
+        {
             if(items.at(i)->to_delete)
             {
                 delete items.at(i);
                 items.erase(items.begin()+i);
-                //deleted++;
             }
             else max++;
 
@@ -94,7 +89,7 @@ void FileDialog::listFiles(string path_name)
 
     struct dirent * file;
     DIR * path;
-    //cout<<path_name<<endl;
+
     if((path = opendir(path_name.c_str())))
     {
         while((file = readdir(path)))
@@ -104,10 +99,9 @@ void FileDialog::listFiles(string path_name)
             fullpath.append(file->d_name);
 
             if(is_regular_file(fullpath.c_str()) == 1 && a_type != SELECT_FOLDER)
-            files.push_back(file->d_name);
+                files.push_back(file->d_name);
             else if(is_regular_file(fullpath.c_str()) == 0)
-            folders.push_back(file->d_name);
-            //else cout<<"is_regular_file != 1, 0"<<endl;
+                folders.push_back(file->d_name);
         }
 
         closedir( path );
@@ -129,13 +123,9 @@ FileDialog::FileDialog()
     sfml_window = nullptr;
     desktop_ = nullptr;
     ExplorerItem::loadImages();
-    //sf::Clock clock;
-    //clock.restart();
 
-    //sf::Vector2f window_size(320, 700);
     dialog_window = Window::Create();
     dialog_window->SetTitle("FileDialog");
-    //dialog_window->SetRequisition(window_size);
 
     dialog_main_box = Box::Create(Box::Orientation::VERTICAL);
     dialog_main_box->SetSpacing(7);
@@ -220,10 +210,10 @@ FileDialog::FileDialog()
     hideWindow();
 }
 
- void FileDialog::setRenderWindow(sf::RenderWindow & win)
- {
-     sfml_window = &win;
- }
+void FileDialog::setRenderWindow(sf::RenderWindow & win)
+{
+    sfml_window = &win;
+}
 
 void FileDialog::showError(const string & message)
 {
@@ -280,11 +270,8 @@ void FileDialog::action(Action action_type)
     dialog_window->SetState(Widget::State::NORMAL);
     listFiles(path);
     dialog_window->Show(true);
-    if(sfml_window != nullptr){}
-    //sf::RenderWindow()
-    //www.create(sf::VideoMode(8, 8), "");
-//    sfml_window->getSize();
-    //dialog_window->SetPosition(sf::Vector2f(sfml_window->getSize().x/2 - dialog_window->GetAllocation().width/2, sfml_window->getSize().y/2 - dialog_window->GetAllocation().height/2));
+    if(sfml_window != nullptr)
+        dialog_window->SetPosition(sf::Vector2f(sfml_window->getSize().x/2 - dialog_window->GetAllocation().width/2, sfml_window->getSize().y/2 - dialog_window->GetAllocation().height/2));
     desktop_->BringToFront(dialog_window);
 
     if(action_type == SELECT_FILE)
@@ -306,9 +293,9 @@ void FileDialog::enterKeyPressed()
     if(dialog_window->IsGloballyVisible())
     {
         if(path_entry->HasFocus())
-        changeDirectory();
+            changeDirectory();
         else if(filename_entry->HasFocus())
-        applyEvent(false);
+            applyEvent(false);
     }
 }
 
@@ -391,7 +378,6 @@ void FileDialog::applyEvent(bool confirm)
             {
                 showError(path+"path is invalid or cannot access");
             }
-
         }
         else
         {
@@ -439,9 +425,9 @@ FileDialog::ExplorerItem::ExplorerItem(int type, string name)
     file_img = Image::Create(file_icon);
 
     if(type == 0)
-    box->Pack(folder_img);
+        box->Pack(folder_img);
     else if(type == 1)
-    box->Pack(file_img);
+        box->Pack(file_img);
     //else cout<<"UNRECOGNIZED FILE TYPE"<<endl;
     box->Pack(label, false, true);
     box->SetRequisition(sf::Vector2f(2000, 26));
@@ -460,10 +446,8 @@ void FileDialog::ExplorerItem::loadImages()
     if(!file_icon.loadFromFile("FileDialog\\fileicon.png"))
         fail = true;
 
-    /*if(fail)
-        cout<<"load image error"<<endl;
-    else
-        cout<<"load image OK"<<endl;*/
+    if(fail)
+        cout<<"load images error"<<endl;
 }
 //**********filesystem functions**********
 namespace
@@ -503,13 +487,12 @@ int dirExists(string path)
 string go_parent_path(string ep)
 {
     int pos = ep.find_last_of('\\');
-    //cout<<"pos "<<pos<<endl;
     if(ep.size()>2&&ep.substr(ep.size()-2, 2) == "..")
-    return ep+"\\..";
+        return ep+"\\..";
     else if(ep == ".")
-    return ep+"\\..";
+        return ep+"\\..";
     else
-    return ep.substr(0, pos);
+        return ep.substr(0, pos);
 }
 
 int is_regular_file(const char *path)

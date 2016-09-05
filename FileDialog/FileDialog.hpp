@@ -1,11 +1,14 @@
 /*
     FileDialog window feature for SFGUI
     https://github.com/Potat0x/SFGUI-FileDialog
-    http://potat0x.cba.pl
+    http://potat0x.cba.pl/
 */
 
 #ifndef file_dialog
 #define file_dialog
+
+#include <SFML/Graphics.hpp>
+#include <SFGUI/SFGUI.hpp>
 #include <SFGUI/Widgets.hpp>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -26,16 +29,15 @@ public:
 
     class Data  //data structure for user
     {
-        public:          //    example
+    public:          //    example
         string directory;//    C:\Windows\System32
         string file_name;//    cmd.exe
         string file_path;//    C:\Windows\System32\cmd.exe
 
-        Data(){}
+        Data() {}
         Data(string dir, string fn, string fp): directory(dir), file_name(fn), file_path(fp)  {}
     };
     Data data;
-
     FileDialog();
     void setDesktop(Desktop & desktop);//pass desktop to filedialog. Required before using dialog
     void setRenderWindow(sf::RenderWindow & win);//if you use it FileDialog will be centered in RenderWindow
