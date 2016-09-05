@@ -22,7 +22,7 @@ class App
     App(const App&){}
 
 public:
-    static App & getApp();
+    static App & get_app();
     void run();
     string get_app_title();
     sf::RenderWindow & get_sfml_window();

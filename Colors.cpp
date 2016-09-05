@@ -4,9 +4,9 @@ Colors::Colors()
 {
     unique_ptr<sf::Color[]> tmp (new sf::Color[COLORS_COUNT]);
     color = move(tmp);
-    //color = unique_ptr<sf::Color[]>(new sf::Color[COLORS_COUNT]);
 
-    /*color[CURVE] = sf::Color(5, 155, 190);
+    /*old theme
+    color[CURVE] = sf::Color(5, 155, 190);
     color[LINK] = sf::Color(40, 159, 88, 100);
     color[PIX] = sf::Color(5, 155, 190);
     color[POINT] = sf::Color(40, 159, 88);
@@ -31,12 +31,7 @@ Colors::Colors()
     color[BACKGROUND] = sf::Color(3, 5, 5);
 }
 
-sf::Color Colors::getColor(Item item)
+sf::Color Colors::getColor(const Item & item)
 {
     return color[item];
-}
-
-Colors::~Colors()
-{
-    //delete [] color;
 }

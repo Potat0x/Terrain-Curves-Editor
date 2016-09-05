@@ -81,13 +81,13 @@ Gui::Gui(sf::RenderWindow & sfml_window)
     edit_box->SetPosition(sf::Vector2f(edit.get()->GetAllocation().left, edit.get()->GetAllocation().height));
 
     undo = Button::Create("Undo");
-    undo->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::undo, &Editor::get_Editor()));
+    undo->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::undo, &Editor::get_editor()));
     edit_box->Pack(undo);
     redo = Button::Create("Redo");
-    redo->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::redo, &Editor::get_Editor()));
+    redo->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::redo, &Editor::get_editor()));
     edit_box->Pack(redo);
     clear_history = Button::Create("Clear history");
-    clear_history->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::clear_changes_history, &Editor::get_Editor()));
+    clear_history->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::clear_changes_history, &Editor::get_editor()));
     edit_box->Pack(clear_history);
     //
     view_box = Box::Create(Box::Orientation::VERTICAL);
@@ -396,7 +396,7 @@ void Gui::export_to_file()
 {
     file_box.get()->Show(false);
     filedialog.action(FileDialog::Action::SELECT_FOLDER_AND_TYPE_FILENAME);
-    Editor::get_Editor().current_operation = Editor::GuiOperations::EXPORT;
+    Editor::get_editor().current_operation = Editor::GuiOperations::EXPORT;
 }
 
 void Gui::show_info(const string & title, const string & message)
@@ -404,7 +404,7 @@ void Gui::show_info(const string & title, const string & message)
     desktop.BringToFront(info_window);
     info_window->SetTitle(title);
     info_label->SetText(message);
-    info_window->SetPosition(sf::Vector2f(App::getApp().get_sfml_window().getSize().x/2 - info_window->GetAllocation().width/2, App::getApp().get_sfml_window().getSize().y/2 - info_window->GetAllocation().height/2));
+    info_window->SetPosition(sf::Vector2f(App::get_app().get_sfml_window().getSize().x/2 - info_window->GetAllocation().width/2, App::get_app().get_sfml_window().getSize().y/2 - info_window->GetAllocation().height/2));
     info_window->Show(true);
 }
 
@@ -412,15 +412,15 @@ void Gui::show_unsaved_ch_window(const string & filename)
 {
     desktop.BringToFront(uch_window);
     uch_label->SetText("File "+filename+"\nis modified. Do you want to save changes?");
-    uch_window->SetPosition(sf::Vector2f(App::getApp().get_sfml_window().getSize().x/2 - uch_window->GetAllocation().width/2, App::getApp().get_sfml_window().getSize().y/2 - uch_window->GetAllocation().height/2));
+    uch_window->SetPosition(sf::Vector2f(App::get_app().get_sfml_window().getSize().x/2 - uch_window->GetAllocation().width/2, App::get_app().get_sfml_window().getSize().y/2 - uch_window->GetAllocation().height/2));
     uch_window->Show(true);
 }
 
 void Gui::window_resize()
 {
-    status_window->SetAllocation(sf::FloatRect(App::getApp().get_sfml_window().getSize().x-status_window->GetAllocation().width, 0, status_window->GetAllocation().width, status_window->GetAllocation().height));
-    status_label[3]->SetAllocation(sf::FloatRect(App::getApp().get_sfml_window().getSize().x-status_label[3]->GetAllocation().width, App::getApp().get_sfml_window().getSize().y-status_label[3]->GetAllocation().height, status_label[3]->GetAllocation().width, status_label[3]->GetAllocation().height));
-    fps_label->SetAllocation(sf::FloatRect(0, App::getApp().get_sfml_window().getSize().y-fps_label->GetAllocation().height, fps_label->GetAllocation().width, fps_label->GetAllocation().height));
+    status_window->SetAllocation(sf::FloatRect(App::get_app().get_sfml_window().getSize().x-status_window->GetAllocation().width, 0, status_window->GetAllocation().width, status_window->GetAllocation().height));
+    status_label[3]->SetAllocation(sf::FloatRect(App::get_app().get_sfml_window().getSize().x-status_label[3]->GetAllocation().width, App::get_app().get_sfml_window().getSize().y-status_label[3]->GetAllocation().height, status_label[3]->GetAllocation().width, status_label[3]->GetAllocation().height));
+    fps_label->SetAllocation(sf::FloatRect(0, App::get_app().get_sfml_window().getSize().y-fps_label->GetAllocation().height, fps_label->GetAllocation().width, fps_label->GetAllocation().height));
 }
 
 void Gui::hide_info()
@@ -431,25 +431,25 @@ void Gui::hide_info()
 void Gui::save_and_exit_app()
 {
     uch_window->Show(false);
-    if(Editor::get_Editor().current_filename.empty() == false)
+    if(Editor::get_editor().current_filename.empty() == false)
     {
-        if(Editor::get_Editor().save_to_file())
+        if(Editor::get_editor().save_to_file())
         {
-            App::getApp().close(true);
+            App::get_app().close(true);
         }
     }
     else
     {
         save_file_as();
-        Editor::get_Editor().current_operation = Editor::GuiOperations::SAVE_AND_EXIT;
+        Editor::get_editor().current_operation = Editor::GuiOperations::SAVE_AND_EXIT;
     }
 }
 
 void Gui::save_file()
 {
-    if(Editor::get_Editor().current_filename.empty() == false)
+    if(Editor::get_editor().current_filename.empty() == false)
     {
-        Editor::get_Editor().save_to_file();
+        Editor::get_editor().save_to_file();
         file_box.get()->Show(false);
     }
     else save_file_as();
@@ -459,35 +459,35 @@ void Gui::save_file_as()
 {
     file_box.get()->Show(false);
     filedialog.action(FileDialog::Action::SELECT_FOLDER_AND_TYPE_FILENAME);
-    Editor::get_Editor().current_operation = Editor::GuiOperations::SAVE_AS;
+    Editor::get_editor().current_operation = Editor::GuiOperations::SAVE_AS;
 }
 
 void Gui::open_file()
 {
     file_box.get()->Show(false);
     filedialog.action(FileDialog::Action::SELECT_FILE);
-    Editor::get_Editor().current_operation = Editor::GuiOperations::OPEN_FILE;
+    Editor::get_editor().current_operation = Editor::GuiOperations::OPEN_FILE;
 }
 
 void Gui::load_b_view()
 {
-    if(Editor::get_Editor().draw_con)
+    if(Editor::get_editor().draw_con)
     link.get()->SetActive(true);
     else link.get()->SetActive(false);
 
-    if(Editor::get_Editor().draw_cur)
+    if(Editor::get_editor().draw_cur)
     curve.get()->SetActive(true);
     else curve.get()->SetActive(false);
 
-    if(Editor::get_Editor().draw_pts)
+    if(Editor::get_editor().draw_pts)
     points.get()->SetActive(true);
     else points.get()->SetActive(false);
 
-    if(Editor::get_Editor().draw_lines)
+    if(Editor::get_editor().draw_lines)
     segments.get()->SetActive(true);
     else segments.get()->SetActive(false);
 
-    if(Editor::get_Editor().draw_gr)
+    if(Editor::get_editor().draw_gr)
     grid.get()->SetActive(true);
     else grid.get()->SetActive(false);
 
@@ -498,31 +498,31 @@ void Gui::switch_grid_usage()
 {
     load_tmp_settings();
     use_grid.get()->SetActive(!use_grid.get()->IsActive());
-    Editor::get_Editor().draw_gr = use_grid.get()->IsActive();
+    Editor::get_editor().draw_gr = use_grid.get()->IsActive();
     update_settings();
 }
 
 void Gui::update_view()
 {
     if(link.get()->IsActive())
-    Editor::get_Editor().draw_con = true;
-    else Editor::get_Editor().draw_con = false;
+    Editor::get_editor().draw_con = true;
+    else Editor::get_editor().draw_con = false;
 
     if(curve.get()->IsActive())
-    Editor::get_Editor().draw_cur = true;
-    else Editor::get_Editor().draw_cur = false;
+    Editor::get_editor().draw_cur = true;
+    else Editor::get_editor().draw_cur = false;
 
     if(points.get()->IsActive())
-    Editor::get_Editor().draw_pts = true;
-    else Editor::get_Editor().draw_pts = false;
+    Editor::get_editor().draw_pts = true;
+    else Editor::get_editor().draw_pts = false;
 
     if(segments.get()->IsActive())
-    Editor::get_Editor().draw_lines = true;
-    else Editor::get_Editor().draw_lines = false;
+    Editor::get_editor().draw_lines = true;
+    else Editor::get_editor().draw_lines = false;
 
     if(grid.get()->IsActive())
-    Editor::get_Editor().draw_gr = true;
-    else Editor::get_Editor().draw_gr = false;
+    Editor::get_editor().draw_gr = true;
+    else Editor::get_editor().draw_gr = false;
 }
 
 void Gui::apply_settings()
@@ -596,15 +596,13 @@ void Gui::create_new_file_apply()
 
     if(is_regular_file(fn.c_str()) == 1)
     {
-        //showOverwriteWindow(path+"\\"+filename_entry->GetText());
         show_info("Error", fn+"\nalready exist.");
     }
     else if(::create_new_file(fn))
     {
-        cout<<"create file ok"<<fn<<endl;
         show_new_file_window(false);
-        Editor::get_Editor().current_filename = fn;
-        Editor::get_Editor().update_title();
+        Editor::get_editor().current_filename = fn;
+        Editor::get_editor().update_title();
     }
     else show_info("Error", fn+"\nCreate file error.");
 }
@@ -612,7 +610,7 @@ void Gui::create_new_file_apply()
 void Gui::create_new_file()
 {
     filedialog.action(FileDialog::Action::SELECT_FOLDER);
-    Editor::get_Editor().current_operation = Editor::GuiOperations::CREATE_NEW_FILE;
+    Editor::get_editor().current_operation = Editor::GuiOperations::CREATE_NEW_FILE;
 }
 
 void Gui::show_help_dialog(bool s)
@@ -731,7 +729,7 @@ void Gui::update(const unsigned int & points, const unsigned int & segments, con
     filedialog.update();
     desktop.Update(update_clock.restart().asSeconds());
 
-    sf::Vector2f mouse_pos_area = App::getApp().get_sfml_window().mapPixelToCoords(static_cast<sf::Vector2i>(Inputs::getInputs().mousePosOnWindow()));
+    sf::Vector2f mouse_pos_area = App::get_app().get_sfml_window().mapPixelToCoords(static_cast<sf::Vector2i>(Inputs::getInputs().mousePosOnWindow()));
     status_label[0]->SetText(filename);
     status_label[1]->SetText("points: "+number_to_string<int>(points));
     status_label[2]->SetText("segments: "+number_to_string<int>(segments));
@@ -745,5 +743,5 @@ void Gui::update_fps(const int & fps)
 
 void Gui::draw()
 {
-    sfgui.Display(App::getApp().get_sfml_window());
+    sfgui.Display(App::get_app().get_sfml_window());
 }

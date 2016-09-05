@@ -16,9 +16,10 @@ class Link;
 class Editor
 {
     friend class Gui;
+
 public:
     shared_ptr<Gui>gui;
-    static Editor & get_Editor();
+    static Editor & get_editor();
     void draw();
     void update();
     void undo();
@@ -76,9 +77,9 @@ private:
 
     Editor();
     Editor(const Editor &) {}
-    string current_filename;
-    bool unsaved;
 
+    bool unsaved_changes;
+    string current_filename;
 
     void add_point_on_cursor();
     void add_curve_on_cursor();
@@ -95,13 +96,10 @@ private:
     void draw_points();
     void draw_grid();
     void draw_area();
-    void area();
+    void create_area();
     void draw_connections();
 
-
-    void ft();
-    void apply_it(const auto & h_item);
-
+    void restore_workarea(const auto & h_item);
     void file_dialog_event();
     void load_from_file(string filename);
     bool save_to_file();

@@ -49,24 +49,24 @@ class Gui
     Separator::Ptr s_sep;
     void show_settingsmenu(bool s);
     //
-    Window::Ptr info_window;            //info
+    Window::Ptr info_window;
     Box::Ptr info_box;
     Label::Ptr info_label;
     Button::Ptr info_button;
     void hide_info();
     //
-    Window::Ptr status_window;            //info
+    Window::Ptr status_window;
     Box::Ptr status_box;
     Label::Ptr status_label[4];//0=filename   1=points    2=segments    3=position
     Label::Ptr fps_label;
     //
-    Window::Ptr uch_window;            //unsaved changes window
+    Window::Ptr uch_window;//unsaved changes window
     Box::Ptr uch_box;
     Box::Ptr uch_box2;
     Label::Ptr uch_label;
     Button::Ptr uch_buttons[3];//0 - yes, 1 - no, 2 - cancel
 
-    bool tmp_use_grid;//zmienne tmp_ gdy user zrezygnuje z ustawien sa przywracane
+    bool tmp_use_grid;//tmp_ variables to restore when user discard changes
     float tmp_segment_step;
     int tmp_grid;
     float last_nonzero_step;

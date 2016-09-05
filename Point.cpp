@@ -33,12 +33,12 @@ Point::Point(const sf::Vector2f &pos)
     ppm_released = true;
     mpm_released = true;
 
-    Editor::get_Editor().unsaved_change();
+    Editor::get_editor().unsaved_change();
 }
 
 Point::~Point()
 {
-    Editor::get_Editor().unsaved_change();
+    Editor::get_editor().unsaved_change();
 }
 
 bool Point::select_press(bool can_press)
@@ -85,22 +85,21 @@ bool Point::select_press(bool can_press)
                 if( (pressed_ptrs.size() == 1 && pressed_ptrs.at(0).get() == this) || pressed_ptrs.size() == 0 || (pressed_ptrs.size() > 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)))
                 {
                     lpm_pressed = true;
-                    setPressed(true);
+                    set_pressed(true);
                 }
                 else if(lpm_released && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
                 {
                     if(pressed)
                     {
                         lpm_pressed = true;
-                        setPressed(false);
+                        set_pressed(false);
                     }
                     else
                     {
                         lpm_pressed = true;
-                        setPressed(true);
+                        set_pressed(true);
                     }
                     lpm_released = false;
-
                 }
 
                 return false;
@@ -112,11 +111,11 @@ bool Point::select_press(bool can_press)
                 {
                     if(selected)
                     {
-                        setSelected(false);
+                        set_selected(false);
                     }
                     else
                     {
-                        setSelected(true);
+                        set_selected(true);
                     }
                     ppm_released = false;
                 }
@@ -147,14 +146,12 @@ bool Point::select_press(bool can_press)
                 }
             }
             mpm_released = false;
-
             return is_node;
         }
         else
         {
             mpm_released = true;
         }
-
     }
     else
     {
@@ -164,7 +161,7 @@ bool Point::select_press(bool can_press)
             {
                 if(select)
                 {
-                    setSelected(false);
+                    set_selected(false);
                 }
                 else if(press)
                 {
@@ -173,7 +170,7 @@ bool Point::select_press(bool can_press)
                         if(pressed_ptrs.size() > 1)
                             after_group = true;
 
-                        setPressed(false);
+                        set_pressed(false);
                         lpm_pressed = false;
                     }
                 }
@@ -229,9 +226,8 @@ bool Point::connect()
     {
         if(check_connection() == false)
         {
-            Editor::get_Editor().unsaved_change();
+            Editor::get_editor().unsaved_change();
             node_ptr->connected.push_back(Link(selected_ptrs.at(0), selected_ptrs.at(1)));
-            cout<<"connect() true";
             return true;
         }
     }
@@ -266,14 +262,13 @@ void Point::erase_selected(const shared_ptr<Point>& ptr)
     }
 }
 
-void Point::setPressed(bool p)
+void Point::set_pressed(bool p)
 {
     if(p)
     {
         if(pressed == false)
         {
             pressed_ptrs.push_back(shared_from_this());
-            //pressed_count++;
         }
 
         pressed = true;
@@ -284,7 +279,6 @@ void Point::setPressed(bool p)
         if(pressed == true)
         {
             erase_pressed(shared_from_this());
-            //pressed_count--;
         }
 
         pressed = false;
@@ -294,7 +288,7 @@ void Point::setPressed(bool p)
     }
 }
 
-void Point::setSelected(bool s)
+void Point::set_selected(bool s)
 {
     if(s)
     {
@@ -319,12 +313,12 @@ void Point::setSelected(bool s)
     }
 }
 
-sf::Vector2f Point::getPosition()
+sf::Vector2f Point::get_position()
 {
     return shape.getPosition();
 }
 
-void Point::setPosition(const sf::Vector2f & pos)
+void Point::set_position(const sf::Vector2f & pos)
 {
     shape.setPosition(pos);
 }
@@ -355,7 +349,7 @@ void Point::move()
 {
     if(pressed)
     {
-        Editor::get_Editor().unsaved_change();
+        Editor::get_editor().unsaved_change();
 
         if(use_grid == true)
             set_on_grid_position();
@@ -363,7 +357,6 @@ void Point::move()
         {
             shape.setPosition(Inputs::getInputs().mousePos());
         }
-
     }
 }
 
@@ -375,8 +368,8 @@ void Point::calculate_diff()
 
         for(unsigned int i = 0; i < pressed_ptrs.size(); i++)
         {
-            pressed_ptrs.at(i)->diff.x = mouse_pos.x - pressed_ptrs.at(i)->getPosition().x;
-            pressed_ptrs.at(i)->diff.y = mouse_pos.y - pressed_ptrs.at(i)->getPosition().y;
+            pressed_ptrs.at(i)->diff.x = mouse_pos.x - pressed_ptrs.at(i)->get_position().x;
+            pressed_ptrs.at(i)->diff.y = mouse_pos.y - pressed_ptrs.at(i)->get_position().y;
         }
     }
 }
@@ -384,7 +377,7 @@ void Point::calculate_diff()
 void Point::move_group()
 {
     sf::Vector2f mouse_pos = Inputs::getInputs().mousePos();
-    Editor::get_Editor().unsaved_change();
+    Editor::get_editor().unsaved_change();
     for(unsigned int i = 0; i < pressed_ptrs.size(); i++)
     {
         pressed_ptrs.at(i)->shape.setPosition(sf::Vector2f(mouse_pos.x-pressed_ptrs.at(i)->diff.x, mouse_pos.y-pressed_ptrs.at(i)->diff.y));

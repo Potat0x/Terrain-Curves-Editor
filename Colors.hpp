@@ -2,13 +2,14 @@
 #define color_hpp
 #include <SFML/Graphics.hpp>
 #include <memory>
+
 using namespace std;
+
 class Colors
 {
-    unique_ptr<sf::Color[]>color;//array
+    unique_ptr<sf::Color[]>color;
     Colors();
-    Colors(const Colors & c){}
-    ~Colors();
+    Colors(const Colors & c) {}
 
 public:
     static Colors & get()
@@ -33,8 +34,7 @@ public:
         COLORS_COUNT
     };
 
-    sf::Color getColor(Item item);
-
+    sf::Color getColor(const Item & item);
 };
 
 #endif // colors_hpp

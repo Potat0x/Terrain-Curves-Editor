@@ -21,7 +21,7 @@ void FPSCounter::update()
     }
 }
 
-int FPSCounter::get()
+unsigned int FPSCounter::get()
 {
     return fps;
 }

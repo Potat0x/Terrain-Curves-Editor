@@ -11,11 +11,11 @@
 
 class Inputs
 {
-    Inputs(){};
-    Inputs(const Inputs & ){};
+    Inputs() {};
+    Inputs(const Inputs & ) {};
     sf::Vector2f mouse_pos;
 
-    public:
+public:
     static Inputs & getInputs()
     {
         static Inputs singleton;

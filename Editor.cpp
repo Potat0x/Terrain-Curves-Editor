@@ -28,7 +28,7 @@ Editor::Editor()
         area_lines[i].setFillColor(sf::Color::White);
     }
     bg_pressed = false;
-    unsaved = false;
+    unsaved_changes = false;
     points_dragged = false;
     area_type = 0;
     history_iter = 0;
@@ -36,7 +36,7 @@ Editor::Editor()
     file_pr = "42657a6965724375727665456469746f722046696c65";//hex "EditorCurveApp File"
 }
 
-Editor & Editor::get_Editor()
+Editor & Editor::get_editor()
 {
     static Editor Editor;
     return Editor;
@@ -47,18 +47,18 @@ void Editor::draw_pixel(sf::Vector2f pos, sf::Color color = Colors::get().getCol
     sf::RectangleShape shape(sf::Vector2f(a, a));
     shape.setPosition(pos.x, pos.y);
     shape.setFillColor(color);
-    App::getApp().get_sfml_window().draw(shape);
+    App::get_app().get_sfml_window().draw(shape);
 }
 
 sf::Vector2i Editor::get_grid_bounds()
 {
-    sf::Vector2i gb(App::getApp().get_sfml_window().getSize());
+    sf::Vector2i gb(App::get_app().get_sfml_window().getSize());
     for(unsigned int i = 0; i < points.size(); i++)
     {
-        if(points.at(i)->getPosition().x > gb.x)
-            gb.x = points.at(i)->getPosition().x;
-        if(points.at(i)->getPosition().y > gb.y)
-            gb.y = points.at(i)->getPosition().y;
+        if(points.at(i)->get_position().x > gb.x)
+            gb.x = points.at(i)->get_position().x;
+        if(points.at(i)->get_position().y > gb.y)
+            gb.y = points.at(i)->get_position().y;
     }
 
     gb.x = (gb.x/Point::grid.x)*Point::grid.x+Point::grid.x+1;
@@ -80,7 +80,7 @@ void Editor::draw_grid()
             grid_line.setSize(sf::Vector2f(1, bounds.y));
             grid_line.setFillColor(Colors::get().getColor(Colors::GRID));
             grid_line.setPosition(i, 0);
-            App::getApp().get_sfml_window().draw(grid_line);
+            App::get_app().get_sfml_window().draw(grid_line);
             x++;
         }
 
@@ -89,12 +89,12 @@ void Editor::draw_grid()
             grid_line.setSize(sf::Vector2f(bounds.x, 1));
             grid_line.setFillColor(Colors::get().getColor(Colors::GRID));
             grid_line.setPosition(0, i);
-            App::getApp().get_sfml_window().draw(grid_line);
+            App::get_app().get_sfml_window().draw(grid_line);
         }
     }
 }
 
-void Editor::area()
+void Editor::create_area()
 {
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && (Inputs::getInputs().get(sf::Mouse::Right) || Inputs::getInputs().get(sf::Mouse::Left)) )
     {
@@ -161,20 +161,20 @@ void Editor::area_contain()
         for(unsigned int i = 0; i < points.size(); i++)
         {
             if(points.at(i)->selected)
-                points.at(i)->setSelected(false);
+                points.at(i)->set_selected(false);
             else if(points.at(i)->pressed)
-                points.at(i)->setPressed(false);
+                points.at(i)->set_pressed(false);
         }
     }
 
     for(unsigned int i = 0; i < points.size(); i++)
     {
-        if(rect.contains(points.at(i)->getPosition().x, points.at(i)->getPosition().y))
+        if(rect.contains(points.at(i)->get_position().x, points.at(i)->get_position().y))
         {
             if(area_type == 1)
-                points.at(i)->setSelected(true);
+                points.at(i)->set_selected(true);
             else if(area_type == 2)
-                points.at(i)->setPressed(true);
+                points.at(i)->set_pressed(true);
         }
     }
 }
@@ -185,8 +185,8 @@ void Editor::draw_area()
     {
         for(int i = 0; i < 4; i++)
         {
-            //App::getApp().get_sfml_window().draw(area_shapes[i]);
-            App::getApp().get_sfml_window().draw(area_lines[i]);
+            //area_shapes
+            App::get_app().get_sfml_window().draw(area_lines[i]);
         }
     }
 }
@@ -200,7 +200,7 @@ void Editor::select_all()
             for(unsigned int i = 0; i < points.size(); i++)
             {
                 if(!points.at(i)->selected)
-                    points.at(i)->setSelected(true);
+                    points.at(i)->set_selected(true);
             }
         }
     }
@@ -217,7 +217,7 @@ void Editor::press_all()
             for(unsigned int i = 0; i < points.size(); i++)
             {
                 if(!points.at(i)->pressed)
-                    points.at(i)->setPressed(true);
+                    points.at(i)->set_pressed(true);
             }
         }
     }
@@ -270,7 +270,6 @@ void Editor::delete_points()
             Point::erase_pressed(ptr);
             check_connection(ptr);
             delete_point(ptr);
-            //delete ptr;
         }
     }
 }
@@ -351,10 +350,10 @@ void Editor::select_point()
             bg_pressed = true;
         }
         else if(bg_pressed && Inputs::getInputs().get(sf::Mouse::Left) && Point::pressed_ptrs.size() > 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
-            {
-                points_dragged = true;
-                Point::move_group();
-            }
+        {
+            points_dragged = true;
+            Point::move_group();
+        }
 
     }
     else bg_pressed = false;
@@ -364,7 +363,6 @@ void Editor::select_point()
         points_dragged = false;
         create_snapshot();
     }
-
 }
 
 void Editor::move_curve()
@@ -393,15 +391,13 @@ void Editor::draw_line(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf:
     c = sqrt(pow(a, 2) + pow(b, 2));
     drl_angle = atan2(p1.y-p2.y,p1.x-p2.x);
 
-    //line = sf::RectangleShape(sf::Vector2f(c, 1));
-    line.setSize(sf::Vector2f(c, 1));//15->20 fps for 10k segments
-
+    line.setSize(sf::Vector2f(c, 1));
     line.setOrigin(line.getLocalBounds().width/2.0f, line.getLocalBounds().height/2.0f);
     line.setPosition((p1.x+p2.x)/2.0f, (p1.y+p2.y)/2.0f);
     line.setRotation(drl_angle* 180.0f / 3.1415926f);
     //line.setFillColor(rand_color());
     line.setFillColor(color);
-    App::getApp().get_sfml_window().draw(line);
+    App::get_app().get_sfml_window().draw(line);
 }
 
 void Editor::draw_connections()
@@ -411,12 +407,8 @@ void Editor::draw_connections()
         {
             for(unsigned int c = 0; c < points.at(i)->connected.size(); c++)
             {
-                draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr1->getPosition(), Colors::get().getColor(Colors::LINK));
-                draw_line(points.at(i)->getPosition(), points.at(i)->connected.at(c).node_ptr2->getPosition(), Colors::get().getColor(Colors::LINK));
-                /*float dist = 0;   //link length
-                dist += abs(sqrt( pow(points.at(i)->getPosition().x-points.at(i)->connected.at(c).node_ptr1->getPosition().x, 2)  +  pow(points.at(i)->getPosition().y-points.at(i)->connected.at(c).node_ptr1->getPosition().y, 2) ));
-                dist += abs(sqrt( pow(points.at(i)->getPosition().x-points.at(i)->connected.at(c).node_ptr2->getPosition().x, 2)  +  pow(points.at(i)->getPosition().y-points.at(i)->connected.at(c).node_ptr2->getPosition().y, 2) ));
-                cout<<dist<<endl;*/
+                draw_line(points.at(i)->get_position(), points.at(i)->connected.at(c).node_ptr1->get_position(), Colors::get().getColor(Colors::LINK));
+                draw_line(points.at(i)->get_position(), points.at(i)->connected.at(c).node_ptr2->get_position(), Colors::get().getColor(Colors::LINK));
             }
         }
 }
@@ -424,7 +416,7 @@ void Editor::draw_connections()
 void Editor::draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vector2f& p3)
 {
     sf::Vector2f p4 = p3;
-    //p3 = p2;
+
     float x, y;
 
     sf::Vector2f last(0, 0);
@@ -440,9 +432,8 @@ void Editor::draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vect
         if(t > 0)
         {
             if(draw_lines)
-            {
                 draw_line(last, sf::Vector2f(x, y), Colors::get().getColor(Colors::CURVE));
-            }
+
             segments++;
             /*
             dist += abs(sqrt( pow(last.x-x, 2)  +  pow(last.y-y, 2) ));
@@ -451,18 +442,15 @@ void Editor::draw(const sf::Vector2f& p1, const sf::Vector2f& p2, const sf::Vect
             float c = sqrt(pow(a, 2) + pow(b, 2));
             */
         }
-
         last = sf::Vector2f(x, y);
     }
-    //cout<<" dist = "<<dist<<endl;
-
-    if(false)
-        for(float t = 0; t <= 1; t +=0.005f)
-        {
-            x = pow(( 1 - t ), 3)*p1.x + 3 * pow(( 1 - t ), 2) * t * p2.x + 3*( 1 - t )*pow(t, 2) * p3.x+pow(t, 3)*p4.x;
-            y = pow(( 1 - t ), 3)*p1.y + 3 * pow(( 1 - t ), 2) * t * p2.y + 3*( 1 - t )*pow(t, 2) * p3.y+pow(t, 3)*p4.y;
-            draw_pixel(sf::Vector2f(x, y));
-        }
+    /*drawing ideal curve
+    for(float t = 0; t <= 1; t +=0.005f)
+    {
+        x = pow(( 1 - t ), 3)*p1.x + 3 * pow(( 1 - t ), 2) * t * p2.x + 3*( 1 - t )*pow(t, 2) * p3.x+pow(t, 3)*p4.x;
+        y = pow(( 1 - t ), 3)*p1.y + 3 * pow(( 1 - t ), 2) * t * p2.y + 3*( 1 - t )*pow(t, 2) * p3.y+pow(t, 3)*p4.y;
+        draw_pixel(sf::Vector2f(x, y));
+    }*/
 }
 
 void Editor::draw_curve()
@@ -473,9 +461,9 @@ void Editor::draw_curve()
     {
         for(unsigned int i = 0; i < points.at(p)->connected.size(); i++)
         {
-            p1 = points.at(p)->connected.at(i).node_ptr1->getPosition();
-            p2 = points.at(p)->getPosition();
-            p3 = points.at(p)->connected.at(i).node_ptr2->getPosition();
+            p1 = points.at(p)->connected.at(i).node_ptr1->get_position();
+            p2 = points.at(p)->get_position();
+            p3 = points.at(p)->connected.at(i).node_ptr2->get_position();
             draw(p1, p2, p3);
         }
     }
@@ -484,21 +472,15 @@ void Editor::draw_curve()
 void Editor::draw_points()
 {
     if(draw_pts)
-    {
         for(unsigned int i = 0; i < points.size(); i++)
-        {
-            points.at(i)->draw(&App::getApp().get_sfml_window());
-        }
+            points.at(i)->draw(&App::get_app().get_sfml_window());
 
-    }
 }
 
 void Editor::create_idents()
 {
     for(unsigned int i = 0; i < points.size(); i++)
-    {
         points.at(i)->ident = i;
-    }
 }
 
 shared_ptr<Point> Editor::get_point_by_id(unsigned int id)
@@ -532,9 +514,9 @@ void Editor::save_segments_to_file(string filename)
         {
             for(unsigned int i = 0; i < points.at(p)->connected.size(); i++)
             {
-                p1 = points.at(p)->connected.at(i).node_ptr1->getPosition();
-                p2 = points.at(p)->getPosition();
-                p3 = points.at(p)->connected.at(i).node_ptr2->getPosition();
+                p1 = points.at(p)->connected.at(i).node_ptr1->get_position();
+                p2 = points.at(p)->get_position();
+                p3 = points.at(p)->connected.at(i).node_ptr2->get_position();
                 p4 = p3;
                 {
                     sf::Vector2f last(0, 0);
@@ -582,13 +564,15 @@ bool Editor::save_to_file()
         return false;
     }
 
-    unsaved = false;
+    unsaved_changes = false;
     update_title();
+
     file<<file_pr<<endl;
     file<<points.size()<<endl;
+
     for(unsigned int i = 0; i < points.size(); i++)
     {
-        file<<points.at(i)->ident<<" "<<points.at(i)->getPosition().x<<" "<<points.at(i)->getPosition().y<<endl;
+        file<<points.at(i)->ident<<" "<<points.at(i)->get_position().x<<" "<<points.at(i)->get_position().y<<endl;
     }
 
     for(unsigned int i = 0; i < points.size(); i++)
@@ -631,6 +615,7 @@ void Editor::load_from_file(string filename)
     float x, y;
     int pts, p_id;
     file>>pts;
+
     for(int i = 0; i < pts; i++)
     {
         file>>p_id>>x>>y;
@@ -638,6 +623,7 @@ void Editor::load_from_file(string filename)
         ptr->ident = p_id;
         points.push_back(ptr);
     }
+
     while(true)
     {
         int id, p1, p2;
@@ -655,27 +641,23 @@ void Editor::load_from_file(string filename)
         }
         else
         {
-            tmp_points[0]->setSelected(true);
-            tmp_points[1]->setSelected(true);
+            tmp_points[0]->set_selected(true);
+            tmp_points[1]->set_selected(true);
 
             if(tmp_node != nullptr)
-            {
                 tmp_node->connect();
-            }
 
-            tmp_points[0]->setSelected(false);
-            tmp_points[1]->setSelected(false);
+            tmp_points[0]->set_selected(false);
+            tmp_points[1]->set_selected(false);
             Point::node_ptr = nullptr;
         }
 
         if(file.eof())
-        {
             break;
-        }
     }
 
     file.close();
-    unsaved = false;
+    unsaved_changes = false;
     update_title();
 }
 
@@ -705,7 +687,7 @@ void Editor::file_dialog_event()
             current_filename = gui->filedialog.data.file_path;
             if(save_to_file())
             {
-                App::getApp().get_sfml_window().close();
+                App::get_app().get_sfml_window().close();
             }
         }
     }
@@ -713,7 +695,7 @@ void Editor::file_dialog_event()
 
 void Editor::update_title()
 {
-    App::getApp().get_sfml_window().setTitle(App::getApp().get_app_title()+" - "+current_filename);
+    App::get_app().get_sfml_window().setTitle(App::get_app().get_app_title()+" - "+current_filename);
 }
 
 string Editor::get_current_filename()
@@ -723,7 +705,7 @@ string Editor::get_current_filename()
 
 bool Editor::check_if_unsaved_changes()
 {
-    return unsaved;
+    return unsaved_changes;
 }
 
 void Editor::update()
@@ -731,7 +713,7 @@ void Editor::update()
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Delete) || sf::Keyboard::isKeyPressed(sf::Keyboard::X))
         delete_points();
 
-    area();
+    create_area();
     if(drawarea_released)
     {
         add_point_on_cursor();
@@ -750,21 +732,21 @@ void Editor::update()
 
 void Editor::unsaved_change()
 {
-    if(unsaved == false)
+    if(unsaved_changes == false)
     {
-        unsaved = true;
-        App::getApp().get_sfml_window().setTitle(string(App::getApp().get_app_title()+" - ")+" *"+current_filename);
+        unsaved_changes = true;
+        App::get_app().get_sfml_window().setTitle(string(App::get_app().get_app_title()+" - ")+" *"+current_filename);
     }
 }
 
-void Editor::apply_it(const auto & h_item)
+void Editor::restore_workarea(const auto & h_item)
 {
     points.clear();
     for(unsigned int i = 0; i < h_item.size(); i++)
     {
         points.push_back(get<0>(h_item.at(i)));
         points.back()->connected = get<1>(h_item.at(i));
-        points.back()->setPosition(get<2>(h_item.at(i)));
+        points.back()->set_position(get<2>(h_item.at(i)));
     }
 
     Point::selected_ptrs.clear();
@@ -783,13 +765,13 @@ void Editor::create_snapshot()
     if(history_iter+1 != history.size() && history.size() > 0)
     {
         if(history_iter+1 < history.size())
-        history.erase(history.begin()+history_iter+1, history.end());
+            history.erase(history.begin()+history_iter+1, history.end());
     }
 
     vector<tuple<shared_ptr<Point>, vector<Link>, sf::Vector2f>>history_el;
     for(unsigned int i = 0; i < points.size(); i++)
     {
-        history_el.push_back(make_tuple(points.at(i), points.at(i)->connected, points.at(i)->getPosition()));
+        history_el.push_back(make_tuple(points.at(i), points.at(i)->connected, points.at(i)->get_position()));
     }
     history.push_back(history_el);
     history_iter = history.size()-1;
@@ -812,7 +794,7 @@ void Editor::undo()
 
     if(history.size() > 0)
     {
-        apply_it(history.at(history_iter));
+        restore_workarea(history.at(history_iter));
     }
 }
 
@@ -827,13 +809,13 @@ void Editor::redo()
 
     if(history.size() > 0)
     {
-        apply_it(history.at(history_iter));
+        restore_workarea(history.at(history_iter));
     }
 }
 
 void Editor::draw()
 {
-    App::getApp().get_sfml_window().clear(Colors::get().getColor(Colors::BACKGROUND));
+    App::get_app().get_sfml_window().clear(Colors::get().getColor(Colors::BACKGROUND));
     draw_grid();
     draw_curve();
     draw_area();

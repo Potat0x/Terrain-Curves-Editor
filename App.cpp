@@ -14,23 +14,23 @@ App::App()
     {
         window.create(sf::VideoMode(winsize.x, winsize.y), app_title);
         if(winsize.x < sf::VideoMode::getDesktopMode().width && winsize.y < sf::VideoMode::getDesktopMode().height)
-        window.setPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width-winsize.x)/2, (sf::VideoMode::getDesktopMode().height-winsize.y)/2));
+            window.setPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width-winsize.x)/2, (sf::VideoMode::getDesktopMode().height-winsize.y)/2));
         else window.setPosition(sf::Vector2i(0, 0));
     }
     gui = make_shared<Gui>(window);
-    Editor::get_Editor().gui = gui;
+    Editor::get_editor().gui = gui;
 
     Inputs::win = &window;
 
     if(fullscreen)
-    view = sf::View(sf::Vector2f(sf::VideoMode::getDesktopMode().width/2, sf::VideoMode::getDesktopMode().height/2), sf::Vector2f(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height));
+        view = sf::View(sf::Vector2f(sf::VideoMode::getDesktopMode().width/2, sf::VideoMode::getDesktopMode().height/2), sf::Vector2f(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height));
     else view = sf::View(sf::Vector2f(winsize.x/2, winsize.y/2), sf::Vector2f(winsize.x, winsize.y));
 
     window.setVerticalSyncEnabled(true);
     window.resetGLStates();
 }
 
-App & App::getApp()
+App & App::get_app()
 {
     static App App;
     return App;
@@ -48,7 +48,7 @@ sf::RenderWindow & App::get_sfml_window()
 
 void App::run()
 {
-    Editor::get_Editor().create_snapshot();
+    Editor::get_editor().create_snapshot();
     while (window.isOpen())
     {
         sf::Event event;
@@ -104,13 +104,12 @@ void App::run()
                 {
                     if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
                     {
-                        Editor::get_Editor().redo();
+                        Editor::get_editor().redo();
                     }
                     else
                     {
-                        Editor::get_Editor().undo();
+                        Editor::get_editor().undo();
                     }
-
                 }
             }
 
@@ -122,7 +121,8 @@ void App::run()
                 view.setCenter(vc);
                 window.setView(view);
                 gui->window_resize();
-            }else gui->handle_event(event);
+            }
+            else gui->handle_event(event);
         }
 
         if(window.hasFocus())
@@ -131,8 +131,8 @@ void App::run()
             Inputs::getInputs().update();
             pan_view();
 
-            Editor::get_Editor().update();
-            Editor::get_Editor().draw();
+            Editor::get_editor().update();
+            Editor::get_editor().draw();
 
             gui->draw();
             window.display();
@@ -146,10 +146,10 @@ void App::run()
 void App::close(bool confirmed)//confirmed = false
 {
     if(confirmed)
-    window.close();
-    else if(Editor::get_Editor().check_if_unsaved_changes())
+        window.close();
+    else if(Editor::get_editor().check_if_unsaved_changes())
     {
-        gui->show_unsaved_ch_window(Editor::get_Editor().get_current_filename());
+        gui->show_unsaved_ch_window(Editor::get_editor().get_current_filename());
     }
     else window.close();
 }
@@ -157,7 +157,7 @@ void App::close(bool confirmed)//confirmed = false
 void App::pan_view()
 {
     if(Point::onmouse)
-    return;
+        return;
 
     if(Inputs::getInputs().getInputs().get(sf::Mouse::Middle) && pan_mouse_mid_released)
     {
@@ -179,7 +179,7 @@ void App::pan_view()
 void App::zoom_view(float delta)
 {
     if(delta < 0)
-    view.zoom(1.05f);
+        view.zoom(1.05f);
     else if(delta > 0)
-    view.zoom(0.95f);
+        view.zoom(0.95f);
 }

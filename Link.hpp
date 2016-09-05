@@ -3,7 +3,6 @@
 
 #include "Point.hpp"
 #include <memory>
-
 using namespace std;
 
 class Point;

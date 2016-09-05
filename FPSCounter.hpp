@@ -5,13 +5,13 @@
 
 class FPSCounter
 {
-    int tmpfps;
-    int fps;
+    unsigned int tmpfps;
+    unsigned int fps;
     sf::Clock clock;
 
 public:
     FPSCounter();
-    int get();
+    unsigned int get();
     void update();
 };
 
