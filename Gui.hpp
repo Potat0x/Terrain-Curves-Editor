@@ -29,7 +29,7 @@ class Gui
     void show_filemenu(bool s);
     //
     Box::Ptr edit_box;
-    Button::Ptr undo, redo, clear_history;
+    Button::Ptr undo, redo, copy, paste, clear_history;
     void show_editmenu(bool s);
     //
     Box::Ptr view_box;

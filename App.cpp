@@ -112,6 +112,20 @@ void App::run()
                     }
                 }
             }
+            else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C)
+            {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    Editor::get_editor().copy();
+                }
+            }
+            else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V)
+            {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    Editor::get_editor().paste();
+                }
+            }
 
             else if (event.type == sf::Event::Resized)
             {

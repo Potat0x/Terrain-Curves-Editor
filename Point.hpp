@@ -37,6 +37,8 @@ public:
     Point(const sf::Vector2f& pos);
     ~Point();
 
+    bool pasted;
+
     vector<Link>connected;
     unsigned int ident;
     bool selected;

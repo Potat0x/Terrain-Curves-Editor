@@ -483,20 +483,25 @@ void Editor::create_idents()
         points.at(i)->ident = i;
 }
 
-shared_ptr<Point> Editor::get_point_by_id(unsigned int id, bool pasted_only)
+shared_ptr<Point> Editor::get_point_by_id(unsigned int id)
 {
     for(unsigned int i = 0; i < points.size(); i++)
     {
         if(points.at(i)->ident == id)
         {
-            if(pasted_only && points.at(i)->pasted)
-            {
-                return points.at(i);
-            }
-            else if(!pasted_only)
-            {
-                return points.at(i);
-            }
+            return points.at(i);
+        }
+    }
+    return nullptr;
+}
+
+shared_ptr<Point> Editor::get_point_by_id(unsigned int id)
+{
+    for(unsigned int i = 0; i < points.size(); i++)
+    {
+        if(points.at(i)->ident == id)
+        {
+            return points.at(i);
         }
     }
     return nullptr;
@@ -822,84 +827,89 @@ void Editor::redo()
 
 void Editor::copy()
 {
-    if(Point::selected_ptrs.size() == 0)
-        return;
+    cout<<"copy"<<endl;
 
-    stash_points.clear();
-    stash_connections.clear();
     create_idents();
+
+    map<int, int>idm;
 
     for(int i = 0; i < Point::selected_ptrs.size(); i++)
     {
-        stash_points.push_back(make_tuple(Point::selected_ptrs.at(i)->ident, Point::selected_ptrs.at(i)->get_position()));
+        shared_ptr<Point> ptr = make_shared<Point>(Point::selected_ptrs.at(i)->get_position());
+        ptr->ident = i;
+        stash_points.push_back(ptr);
+
         for(unsigned int c = 0; c < Point::selected_ptrs.at(i)->connected.size(); c++)
         {
-            stash_connections.push_back(make_tuple(Point::selected_ptrs.at(i)->ident, Point::selected_ptrs.at(i)->connected.at(c).node_ptr1->ident, Point::selected_ptrs.at(i)->connected.at(c).node_ptr2->ident));
+            stash_connections.push_back(make_tuple(Point::selected_ptrs.at(i)->ident+1000, Point::selected_ptrs.at(i)->connected.at(c).node_ptr1->ident+1000, Point::selected_ptrs.at(i)->connected.at(c).node_ptr2->ident+1000));
         }
     }
+
+    /*for(unsigned int i = 0; i < stash_points.size(); i++)
+    {
+        if(stash_points.at(i)->connected.size() > 0)
+        {
+            for(unsigned int c = 0; c < stash_points.at(i)->connected.size(); c++)
+            {
+                //file<<endl<<stash_points.at(i)->ident<<"    "<<stash_points.at(i)->connected.at(c).node_ptr1->ident<<" "<<stash_points.at(i)->connected.at(c).node_ptr2->ident;
+                stash_connections.push_back(make_tuple(stash_points.at(i)->ident, stash_points.at(i)->connected.at(c).node_ptr1->ident, stash_points.at(i)->connected.at(c).node_ptr2->ident));
+            }
+        }
+    }*/
+
+    cout<<"copy end"<<stash_connections.size()<<endl;
 }
 
 void Editor::paste()
 {
-    if(stash_points.size() == 0)
-        return;
-
-    int left_i = 0, right_i = 0, top_i = 0, bot_i = 0;
-    int left, right, top, bot, left_start, top_start;
-    sf::Vector2f mid;
-
-    for(int i = 0; i < stash_points.size(); i++)
-    {
-        if(get<1>(stash_points.at(i)).x < get<1>(stash_points.at(left_i)).x)
-            left_i = i;
-        if(get<1>(stash_points.at(i)).x > get<1>(stash_points.at(right_i)).x)
-            right_i = i;
-        if(get<1>(stash_points.at(i)).y < get<1>(stash_points.at(top_i)).y)
-            top_i = i;
-        if(get<1>(stash_points.at(i)).y > get<1>(stash_points.at(bot_i)).y)
-            bot_i = i;
-    }
-
-    left = get<1>(stash_points.at(left_i)).x;
-    right = get<1>(stash_points.at(right_i)).x;
-    top = get<1>(stash_points.at(top_i)).y;
-    bot = get<1>(stash_points.at(bot_i)).y;
-    mid = sf::Vector2f((right-left)/2+left, (bot-top)/2+top);
-    left_start = mid.x - (right-left)/2;
-    top_start = mid.y - (bot-top)/2;
-
-    for(int i = 0; i < stash_points.size(); i++)
-    {
-        points.push_back(make_shared<Point>(sf::Vector2f(get<1>(stash_points.at(i)).x - left_start + Inputs::getInputs().mousePos().x - (right-left)/2, get<1>(stash_points.at(i)).y - top_start+Inputs::getInputs().mousePos().y - (bot-top)/2)));
-        points.back()->pasted = true;
-        points.back()->ident = get<0>(stash_points.at(i));
-    }
+    cout<<"paste"<<endl;
 
     for(int i = 0; i < stash_connections.size(); i++)
     {
+        //cout<<"p"<<i<<endl;
         int id, p1, p2;
+        //file>>id>>p1>>p2;
         id = get<0>(stash_connections.at(i));
         p1 = get<1>(stash_connections.at(i));
         p2 = get<2>(stash_connections.at(i));
 
-        shared_ptr<Point> tmp_node = get_point_by_id(id, true);
+        shared_ptr<Point> tmp_node = get_point_by_id(id);
         Point::node_ptr = tmp_node;
         shared_ptr<Point> tmp_points[2];
-        tmp_points[0] = get_point_by_id(p1, true);
-        tmp_points[1] = get_point_by_id(p2, true);
+        tmp_points[0] = get_point_by_id(p1);
+        tmp_points[1] = get_point_by_id(p2);
 
-        if(tmp_points[0] != nullptr && tmp_points[1] != nullptr && tmp_node != nullptr)
+        if(tmp_points[0] == nullptr || tmp_points[1] == nullptr || tmp_node == nullptr)
         {
-            tmp_node->connected.push_back(Link(tmp_points[0], tmp_points[1]));
+            //Point::node_ptr = nullptr;
+        }
+        else
+        {
+            tmp_points[0]->set_selected(true);
+            tmp_points[1]->set_selected(true);
+
+            if(tmp_node != nullptr)
+            {
+                tmp_node->connect();
+                cout<<"connect"<<endl;
+            }
+
+
+            tmp_points[0]->set_selected(false);
+            tmp_points[1]->set_selected(false);
             Point::node_ptr = nullptr;
         }
+
     }
 
-    for(unsigned int i = 0; i < points.size(); i++)
-        points.at(i)->pasted = false;
 
-    create_snapshot();
-    unsaved_change();
+    for(int i = 0; i < stash_points.size(); i++)
+    {
+        points.push_back(stash_points.at(i));
+    }
+
+
+    sf::sleep(sf::milliseconds(300));
 }
 
 void Editor::draw()

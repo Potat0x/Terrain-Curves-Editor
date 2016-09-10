@@ -32,7 +32,7 @@ Point::Point(const sf::Vector2f &pos)
     ppm_pressed = false;
     ppm_released = true;
     mpm_released = true;
-
+    pasted = false;
     Editor::get_editor().unsaved_change();
 }
 

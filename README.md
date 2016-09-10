@@ -18,8 +18,10 @@ Terrain editor for 2D games based on Bezier curves.
 | Space         | create curve                        |
 | Hold LShift + Mouse| select/press array             |
 | Hold LCtrl         | select/press multiple points   |
+| Ctrl + C/V         | copy/paste                     |
+| Ctrl + Z/Shift+Z   | undo/redo                      |
 When points are selected, you can move them.
-When points are pressed, you can delete them or create a curve.
+When points are pressed, you can delete and copy them or create a curve.
 
 ###Creating curve
 Press Y - new curve will be spawned.

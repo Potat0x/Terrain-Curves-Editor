@@ -8,6 +8,7 @@
 #include "Point.hpp"
 #include <utility>
 #include <memory>
+#include <map>
 
 using namespace std;
 class Gui;
@@ -24,6 +25,8 @@ public:
     void update();
     void undo();
     void redo();
+    void copy();
+    void paste();
     void unsaved_change();
     bool check_if_unsaved_changes();
     string get_current_filename();
@@ -51,6 +54,8 @@ private:
     bool draw_cur;
 
     vector<shared_ptr<Point>>points;
+    vector<tuple<int, sf::Vector2f>>stash_points;
+    vector<tuple<int, int, int>>stash_connections;
     vector<vector<tuple<shared_ptr<Point>, vector<Link>, sf::Vector2f>>>history;//undo-redo
     int history_iter;
     void clear_changes_history();
@@ -106,7 +111,7 @@ private:
     void save_segments_to_file(string filename);
 
     void update_title();
-    shared_ptr<Point> get_point_by_id(unsigned int id);
+    shared_ptr<Point> get_point_by_id(unsigned int id, bool pasted_only = false);
     void create_idents();
     void delete_point(const shared_ptr<Point> & ptr);
     void check_connection(const shared_ptr<Point> & test);

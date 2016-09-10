@@ -86,6 +86,12 @@ Gui::Gui(sf::RenderWindow & sfml_window)
     redo = Button::Create("Redo");
     redo->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::redo, &Editor::get_editor()));
     edit_box->Pack(redo);
+    copy = Button::Create("Copy");
+    copy->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::copy, &Editor::get_editor()));
+    edit_box->Pack(copy);
+    paste = Button::Create("Paste");
+    paste->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::paste, &Editor::get_editor()));
+    edit_box->Pack(paste);
     clear_history = Button::Create("Clear history");
     clear_history->GetSignal(Button::OnLeftClick).Connect(bind(&Editor::clear_changes_history, &Editor::get_editor()));
     edit_box->Pack(clear_history);
