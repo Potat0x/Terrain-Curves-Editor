@@ -1,5 +1,5 @@
 /*
-    Terrain Curves Editor 1.0
+    Terrain Curves Editor 1.1
     Simple curve editor designed to create maps for 2D games
     https://github.com/Potat0x/Terrain-Curves-Editor
     http://potat0x.cba.pl/terrain-curves-editor

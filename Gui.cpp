@@ -287,7 +287,7 @@ Gui::Gui(sf::RenderWindow & sfml_window)
     about_box = Box::Create(Box::Orientation::VERTICAL);
     about_window->Add(about_box);
     about_label_t = Label::Create("Terrain Curves Editor");
-    about_label = Label::Create("Terrain editor for 2D games based on Bezier curves.\nVersion:    1.0\ngithub.com/Potat0x/Terrain-Curves-Editor\n\nCreated with SFML and SFGUI\npotat0x.cba.pl");
+    about_label = Label::Create("Terrain editor for 2D games based on Bezier curves.\nVersion:    1.1\ngithub.com/Potat0x/Terrain-Curves-Editor\n\nCreated with SFML and SFGUI\npotat0x.cba.pl");
     about_box->Pack(about_label_t);
     about_box->Pack(about_label);
     //
